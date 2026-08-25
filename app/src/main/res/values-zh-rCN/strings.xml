@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="title_configuration">权限配置</string>
     <string name="title_monitor_control">服务运行控制</string>
@@ -10,18 +11,15 @@
     <string name="action_stop">停止</string>
     <string name="action_request_fix">修复</string>
     <string name="action_dismiss">忽略</string>
-
     <string name="title_feature_config">功能配置</string>
     <string name="config_enable_overlay">启用悬浮窗</string>
     <string name="config_enable_overlay_desc">显示桌面悬浮窗</string>
     <string name="config_overlay_disabled_reason">服务运行中无法修改，请先停止服务</string>
     <string name="config_enable_notification">在通知上显示</string>
     <string name="config_enable_notification_desc">在通知栏显示网速</string>
-
     <string name="title_tools">工具箱</string>
     <string name="action_speed_test">网络测速</string>
     <string name="desc_speed_test">使用 Cloudflare 进行测速</string>
-
     <string name="title_settings">设置</string>
     <string name="settings_selected_page">当前页面</string>
     <string name="settings_category_general">常规设置</string>
@@ -125,13 +123,10 @@
     <string name="settings_pixel_tailor_desc">为中国 Pixel 用户精心缝补纯净 Android 体验</string>
     <string name="settings_telegram_channel">Telegram 频道</string>
     <string name="settings_telegram_channel_desc">关注 Telegram 频道获取最新动态</string>
-
     <string name="color_picker_title">选择颜色</string>
-
     <string name="content_description_settings">设置</string>
     <string name="content_description_back">返回</string>
     <string name="notification_channel_description">在状态栏显示实时网速</string>
-
     <string name="onboarding_title">设置 Pixel Meter</string>
     <string name="onboarding_step">第 %1$d 步，共 %2$d 步</string>
     <string name="onboarding_skip">跳过</string>
@@ -164,17 +159,14 @@
     <string name="onboarding_finish_later">稍后授权</string>
     <string name="settings_run_onboarding_title">重新运行设置向导</string>
     <string name="settings_run_onboarding_desc">重新选择显示方式并检查必要权限</string>
-
     <string name="error_unknown">未知错误</string>
     <string name="error_notification_permission">启用通知需要授予“通知权限”</string>
     <string name="error_overlay_permission">启用悬浮窗需要“显示在其他应用上层”的权限</string>
     <string name="error_service_start_failed">启动服务失败: %1$s</string>
-
     <string name="notification_channel_name">网速显示服务</string>
     <string name="notification_content_title">网速显示</string>
     <string name="notification_content_text">正在运行…</string>
     <string name="notification_content_text_monitoring">监听中…</string>
-
     <string name="tile_overlay_label">悬浮窗</string>
     <string name="tile_notification_label">通知栏显示</string>
     <string name="tile_desc_active">已开启</string>
