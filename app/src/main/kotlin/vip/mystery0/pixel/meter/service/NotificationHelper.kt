@@ -66,7 +66,7 @@ class NotificationHelper(private val context: Context) {
         val color: Int = 0
     ) {
         /**
-         * 生成仅与实际展示结果相关的稳定指纹，用于避免重复发布相同通知。
+         * Creates a stable fingerprint from visible output to avoid reposting equivalent notifications.
          */
         fun toFingerprint(): String = listOf(
             mode,

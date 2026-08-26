@@ -1,9 +1,9 @@
 package vip.mystery0.pixel.meter.data.model
 
 /**
- * 应用主题模式。
+ * Application theme mode.
  *
- * value 会持久化到 DataStore，新增模式时必须保持已有数值不变，避免影响用户已有设置。
+ * The value is persisted in DataStore. Keep existing numeric values stable when adding modes to preserve user settings.
  */
 enum class AppThemeMode(val value: Int) {
     Dynamic(0),

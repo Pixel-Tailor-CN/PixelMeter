@@ -1,50 +1,50 @@
-# 需求设计与实施计划
+# Requirement Designs and Implementation Plans
 
-`docs/plans/` 是 Pixel Meter 后续需求设计文档和实施计划的统一存放位置。
+`docs/plans/` is the canonical location for future Pixel Meter requirement designs and implementation plans.
 
-## 命名规则
+## Naming
 
-同一需求的设计和计划使用相同主题名称：
+Use the same topic for a requirement's design and plan:
 
 ```text
-YYYY-MM-DD-主题-design.md
-YYYY-MM-DD-主题-plan.md
+YYYY-MM-DD-topic-design.md
+YYYY-MM-DD-topic-plan.md
 ```
 
-示例：
+Example:
 
 ```text
 2026-08-25-overlay-snap-design.md
 2026-08-25-overlay-snap-plan.md
 ```
 
-主题名称使用简短、稳定的英文 kebab-case，避免使用版本号作为唯一主题。
+Topics use short, stable English kebab-case names. Do not use a version number as the only topic.
 
-## 设计文档内容
+## Design Contents
 
-设计文档至少说明：
+A design should cover:
 
-- 背景、用户问题和目标。
-- 明确范围与非目标。
-- Android 版本、权限和系统限制。
-- 用户流程和关键状态。
-- 架构、组件边界与数据流。
-- DataStore、兼容性和迁移影响。
-- 风险、替代方案和验证方式。
+- Context, user problem, and goals.
+- Explicit scope and non-goals.
+- Android versions, permissions, and system constraints.
+- User flows and key states.
+- Architecture, component boundaries, and data flow.
+- DataStore, compatibility, and migration impact.
+- Risks, alternatives, and validation.
 
-## 实施计划内容
+## Implementation Plan Contents
 
-实施计划至少说明：
+An implementation plan should cover:
 
-- 创建、修改和删除的文件。
-- 按依赖顺序拆分的实施步骤。
-- 每一步的预期结果。
-- 构建、Lint 和真机验证要求。
-- 文档、国际化、权限和发布检查。
+- Files to create, modify, or delete.
+- Steps ordered by dependency.
+- Expected result of each step.
+- Build, Lint, and device-validation requirements.
+- Documentation, localization, permissions, and release checks.
 
-## 生命周期
+## Lifecycle
 
-- 需求变更时同步修改设计和计划，避免创建互相矛盾的副本。
-- 已完成且仍有架构参考价值的文档可以保留。
-- 一次性命令记录、临时调查结果和无长期价值的草稿不应提交。
-- 文档内容不得替代代码审查、构建、Lint 或真机验证。
+- Update designs and plans when requirements change; do not create conflicting copies.
+- Completed documents may remain when they retain architectural value.
+- Do not commit one-off command logs, temporary investigations, or drafts with no long-term value.
+- Documentation does not replace code review, builds, Lint, or device validation.

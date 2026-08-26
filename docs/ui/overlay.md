@@ -1,78 +1,47 @@
 # Compose Overlay
 
-## 1. 窗口模型
+## 1. Window Model
 
-Overlay 使用：
+The Overlay uses `WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY` and requires `SYSTEM_ALERT_WINDOW` permission.
 
-```text
-WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-```
+Default flags are `FLAG_NOT_FOCUSABLE`, `FLAG_LAYOUT_IN_SCREEN`, and `FLAG_NOT_TOUCH_MODAL`. Allowing the Overlay over the status bar adds `FLAG_LAYOUT_NO_LIMITS` and configures cutout mode.
 
-启用前必须获得 `SYSTEM_ALERT_WINDOW` 权限。窗口默认包含：
+## 2. Compose Host
 
-- `FLAG_NOT_FOCUSABLE`
-- `FLAG_LAYOUT_IN_SCREEN`
-- `FLAG_NOT_TOUCH_MODAL`
+`OverlayWindow` creates a `ComposeView` outside an Activity and implements `LifecycleOwner`, `ViewModelStoreOwner`, and `SavedStateRegistryOwner`.
 
-允许进入状态栏区域时增加 `FLAG_LAYOUT_NO_LIMITS`，并设置 Cutout Mode。
+Showing initializes lifecycle and saved state. Hiding removes the View, dispatches the destroy event, and clears the `ViewModelStore`.
 
-## 2. Compose 宿主
+## 3. Content
 
-OverlayWindow 在 Activity 外创建 `ComposeView`，并实现：
+The Overlay displays upload and download speeds formatted by `SpeedFormatter`. It supports custom prefixes and order, horizontal or vertical layout, Start/Center/End alignment for vertical values, horizontal spacing, text size, padding, corner radius, custom colors, themed colors, and a transparent background.
 
-- `LifecycleOwner`
-- `ViewModelStoreOwner`
-- `SavedStateRegistryOwner`
+## 4. Dragging and Position
 
-显示时建立 Lifecycle 和 SavedState，隐藏时移除 View、发送销毁事件并清理 ViewModelStore。
+When unlocked, `detectDragGestures` updates WindowManager X/Y coordinates. Drag completion writes the coordinates to DataStore for the next display session.
 
-## 3. 展示内容
+Coordinates use px and may be negative. The status-bar option changes the valid drag area and must be validated on devices with display cutouts.
 
-Overlay 显示上传和下载速度，格式由 `SpeedFormatter` 提供。
+## 5. Conditional Hiding
 
-支持：
+### Landscape
 
-- 自定义上下行前缀与顺序。
-- 横排或竖排。
-- 竖排数值 Start/Center/End 对齐。
-- 横排间距。
-- 字号、背景内边距和圆角。
-- 自定义背景色与文字色。
-- 使用主题默认颜色。
-- 完全隐藏背景。
+Portrait Only hides the Overlay in landscape orientation.
 
-## 4. 拖拽与位置
+### Immersive Mode
 
-未锁定时通过 `detectDragGestures` 更新 WindowManager X/Y。拖拽结束后将坐标写入 DataStore，下次显示时恢复。
+WindowInsets provide status-bar and navigation-bar visibility. If the foreground app hides either system bar, the Overlay can become transparent and non-touchable.
 
-位置坐标使用 px，并允许负数。状态栏区域开关可能改变有效可拖拽范围，必须真机验证 Cutout 设备。
+The root `ComposeView` remains attached so it can continue receiving Insets and restore the Overlay when system bars return.
 
-## 5. 条件隐藏
+### Sustained Low Traffic
 
-### 横屏隐藏
+The Overlay hides after total speed remains below `key_overlay_auto_hide_threshold` for three sampling cycles and reappears when speed recovers. A threshold of zero disables this behavior.
 
-开启 Portrait Only 后，设备处于 Landscape 时隐藏。
+## 6. Theme and Colors
 
-### 沉浸模式隐藏
+The Overlay uses the app's `PixelPulseTheme`. Default color mode uses Material 3 Surface and OnSurface colors; custom mode uses saved ARGB values.
 
-通过 WindowInsets 观察状态栏和导航栏可见性。当前台应用隐藏任一系统栏时，可将 Overlay 透明并设为不可触摸。
+## 7. Device Validation
 
-根 ComposeView 仍保持挂载，以便系统栏恢复时继续收到 Insets 并重新显示。
-
-### 低流量自动隐藏
-
-当总网速连续 3 个采样周期低于 `key_overlay_auto_hide_threshold` 时隐藏；速度恢复后重新显示。阈值为 0 时禁用。
-
-## 6. 主题与颜色
-
-Overlay 使用与 App 相同的 `PixelPulseTheme`。默认颜色模式读取 Material 3 Surface/OnSurface；自定义颜色模式使用用户保存的 ARGB。
-
-## 7. 真机验证
-
-- Overlay 权限授予和撤销。
-- 拖拽、锁定和重启后位置恢复。
-- 横竖屏切换。
-- 状态栏、刘海和打孔区域。
-- 全屏视频、游戏等沉浸模式。
-- 导航模式切换。
-- 低流量隐藏和恢复。
+Validate permission grant and revocation, dragging and position persistence, orientation changes, status-bar and cutout areas, immersive video or games, navigation-mode changes, and low-traffic hiding and restoration.

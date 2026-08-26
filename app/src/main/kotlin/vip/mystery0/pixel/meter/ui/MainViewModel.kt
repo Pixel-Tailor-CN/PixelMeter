@@ -73,7 +73,7 @@ class MainViewModel(
     fun startService() {
         _serviceStartError.value = null
 
-        // 1. 检查通知权限（仅 Android 13+ 需要运行时授权）
+        // 1. Check notification permission (runtime grant is required only on Android 13+).
         if (!hasNotificationPermission()) {
             _serviceStartError.value =
                 application.getString(R.string.error_notification_permission) to Settings.ACTION_APP_NOTIFICATION_SETTINGS

@@ -1,73 +1,59 @@
-# 首次设置向导
+# Onboarding
 
-## 1. 目标
+## 1. Goal
 
-Onboarding 帮助新用户理解 VPN 去重能力、选择显示方式并授予必要权限。它不应在用户未确认时自动启用任何显示方式。
+Onboarding explains VPN-safe traffic counting, lets users choose display methods, and requests only the required permissions. It must not enable a display method without confirmation.
 
-## 2. 展示规则
+## 2. Display Rules
 
-- 新安装且 Preferences 为空：自动展示一次。
-- 已存在 Preferences 的旧用户：升级后不自动展示。
-- 用户跳过或完成后写入 `key_onboarding_shown=true`。
-- 设置 → General 提供重新运行向导入口。
+- A new installation with empty Preferences shows Onboarding once.
+- Existing users with Preferences are not shown Onboarding after upgrading.
+- Skipping or finishing writes `key_onboarding_shown=true`.
+- Settings > General provides an entry to rerun the wizard.
 
-## 3. 三步流程
+## 3. Three-Step Flow
 
-### Step 1：产品说明
+### Step 1: Product Introduction
 
-说明应用用途和通过物理接口避免 VPN 重复统计的核心价值。
+Explain the app's purpose and how reading physical interfaces avoids counting VPN traffic twice. Actions are Start setup, Set up later, and the TopAppBar Skip action.
 
-操作：
+### Step 2: Display Methods
 
-- 开始设置。
-- 稍后设置。
-- TopAppBar 跳过。
+All options are disabled by default: notification speed, Live Update, and Overlay.
 
-### Step 2：显示方式
+Recommended configuration:
 
-默认全部关闭：
+- Android 16+: notification speed + Live Update.
+- Earlier versions: notification speed.
 
-- 通知网速。
-- Live Update。
-- Overlay。
+Disabling notification speed also disables Live Update. Live Update cannot be changed on unsupported versions. The page must explain that Android always requires a basic Foreground Service notification while monitoring.
 
-推荐方案：
+### Step 3: Permissions and Completion
 
-- Android 16+：通知网速 + Live Update。
-- 较低版本：通知网速。
+Selecting notification speed or Overlay requires notification permission because monitoring uses a Foreground Service. Overlay additionally requires permission to draw over other apps.
 
-关闭通知网速时同时关闭 Live Update。Live Update 在不支持的版本上不可操作。
+- All required permissions granted: show "Finish and start".
+- No display method selected: show "Finish" and do not start the Service.
+- Permissions incomplete: disable the primary action and offer "Grant later"; save selections without starting automatically.
 
-页面需要说明：Foreground Service 运行时始终需要基础通知。
+## 4. Persistence
 
-### Step 3：权限与完成
-
-通知或 Overlay 任一被选择时，监听服务都需要通知权限；Overlay 还需要显示在其他应用上层权限。
-
-- 所需权限全部授予：显示“完成并启动”。
-- 没有选择任何显示方式：显示“完成”，不启动服务。
-- 权限未完成：主按钮禁用，提供“稍后完成”，保存选择但不启动。
-
-## 4. 数据写入
-
-完成时一次保存：
+Completion writes these values together:
 
 - `key_onboarding_shown`
 - `key_notification_enabled`
 - `key_live_update`
 - `key_overlay_enabled`
 
-完成并启动时，Repository 先更新持久化与 StateFlow，再由 MainViewModel 启动 Service，避免服务读取旧配置。
+For "Finish and start", the Repository updates persistence and StateFlow before `MainViewModel` starts the Service, preventing the Service from reading stale configuration.
 
-## 5. 生命周期
+## 5. Lifecycle
 
-MainActivity 通过 Intent Extra 接收“重新运行向导”请求。Extra 使用后立即移除，避免 Activity 重建时重复打开。
+`MainActivity` receives rerun requests through an Intent extra. The extra is removed after consumption to prevent Activity recreation from reopening the wizard. Permission state refreshes on Activity `ON_RESUME` to handle returns from system settings.
 
-权限状态在 Activity `ON_RESUME` 时刷新，以处理从系统授权页返回的场景。
+## 6. Copy and Compatibility
 
-## 6. 文案和兼容性
-
-- 所有文案必须来自 String Resource。
-- 权限名称和 Android 版本限制应明确。
-- 新增向导文案必须同步所有 Locale。
-- 修改完成逻辑时应覆盖 Android 12/12L 与 Android 13+ 的通知权限差异。
+- All UI copy must come from String Resources.
+- Permission names and Android-version restrictions must be explicit.
+- New Onboarding copy must be added to every supported Locale.
+- Completion behavior must account for notification-permission differences between Android 12/12L and Android 13+.

@@ -1,0 +1,54 @@
+﻿name: Bug report
+description: Report a reproducible problem in Pixel Meter
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem. English is recommended so more contributors can help, but other languages are welcome.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Enable...
+        3. Observe...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Pixel Meter version
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and Android version
+      placeholder: Pixel 9, Android 16
+    validations:
+      required: true
+  - type: checkboxes
+    id: conditions
+    attributes:
+      label: Relevant features
+      options:
+        - label: A VPN was active
+        - label: Notification speed was enabled
+        - label: Live Update was enabled
+        - label: Overlay was enabled
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional context or logs
+      description: Remove personal information and secrets before posting.

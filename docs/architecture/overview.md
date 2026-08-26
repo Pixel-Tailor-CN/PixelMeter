@@ -1,20 +1,20 @@
-# 总体架构
+# Architecture Overview
 
-## 1. 项目形态
+## 1. Project Structure
 
-Pixel Meter 是单模块 Android 应用，主模块为 `app/`，包根路径为 `vip.mystery0.pixel.meter`。
+Pixel Meter is a single-module Android application. The main module is `app/`, and the root package is `vip.mystery0.pixel.meter`.
 
-- 语言：Kotlin
-- UI：Jetpack Compose + Material 3
-- 架构：分层 MVVM + Repository
-- 依赖注入：Koin
-- 持久化：Preferences DataStore
-- 状态：StateFlow
-- 最低版本：Android 12 / API 31
+- Language: Kotlin
+- UI: Jetpack Compose + Material 3
+- Architecture: layered MVVM + Repository
+- Dependency injection: Koin
+- Persistence: Preferences DataStore
+- State: StateFlow
+- Minimum version: Android 12 / API 31
 
-依赖和工具链版本以 `gradle/libs.versions.toml` 为准。
+`gradle/libs.versions.toml` is the source of truth for dependencies and toolchain versions.
 
-## 2. 分层
+## 2. Layers
 
 ```text
 Android System APIs
@@ -41,54 +41,52 @@ Compose UI
   └─ OverlayWindow
 ```
 
-## 3. 实时网速数据流
+## 3. Real-Time Speed Data Flow
 
-1. `SpeedDataSource` 通过 `NetworkCallback` 缓存物理网络与接口名称。
-2. `NetworkRepository` 按用户采样间隔调用 `getTrafficData()`。
-3. Repository 根据前后字节计数和时间差计算上下行速度。
-4. 结果写入 `StateFlow<NetSpeedData>`。
-5. `NetworkMonitorService` 收集速度状态：
-   - 更新通知或 Live Update。
-   - 更新或隐藏 Overlay。
-6. 主界面直接观察相同 StateFlow 展示实时值。
+1. `SpeedDataSource` uses `NetworkCallback` to cache physical networks and their interface names.
+2. `NetworkRepository` calls `getTrafficData()` at the user-selected sampling interval.
+3. The Repository calculates upload and download speeds from byte-counter and time deltas.
+4. Results are published through `StateFlow<NetSpeedData>`.
+5. `NetworkMonitorService` collects the speed state to update notifications, Live Update, and the Overlay.
+6. The main screen observes the same StateFlow to display current values.
 
-## 4. 设置数据流
+## 4. Settings Data Flow
 
-1. `DataStoreRepository` 定义并读写全部 Preferences Key。
-2. `NetworkRepository` 将设置映射为长期 `StateFlow`。
-3. ViewModel 将状态暴露给 Compose UI，并将修改请求委托给 Repository。
-4. Service、NotificationHelper 和 OverlayWindow 读取相同状态，保证配置一致。
+1. `DataStoreRepository` defines and reads or writes all Preferences keys.
+2. `NetworkRepository` maps settings to long-lived `StateFlow` instances.
+3. ViewModels expose state to Compose and delegate updates to the Repository.
+4. The Service, `NotificationHelper`, and `OverlayWindow` consume the same state to keep behavior consistent.
 
-## 5. 主要组件
+## 5. Main Components
 
 ### SpeedDataSource
 
-负责网络识别和接口字节计数，不负责速度差值、UI 或持久化。
+Identifies networks and reads per-interface byte counters. It does not calculate speed deltas or handle UI and persistence.
 
 ### NetworkRepository
 
-负责网速采样、差值计算和应用级设置状态。它是 Service 与 UI 的共享状态中心。
+Owns speed sampling, delta calculation, and application-level settings state. It is the shared state hub for the Service and UI.
 
 ### SpeedFormatter
 
-无状态格式化组件，统一主页、通知 Bitmap、Live Update、Overlay 和设置阈值中的数值精度与单位。
+A stateless formatter that keeps value precision and units consistent across the main screen, notification Bitmap, Live Update, Overlay, and threshold summaries.
 
 ### NetworkMonitorService
 
-负责长期运行、采样生命周期、通知发布和 Overlay 更新，不承载设置页面逻辑。
+Owns long-running monitoring, sampling lifecycle, notification publication, and Overlay updates. It does not contain settings-screen logic.
 
 ### MainViewModel / SettingsViewModel
 
-负责 UI 事件、权限状态与 Repository 交互。Activity 只保留系统 Launcher、Intent 和 Compose 宿主职责。
+Handle UI events, permission state, and Repository interaction. Activities retain only system launcher, Intent, and Compose-host responsibilities.
 
-## 6. 依赖注入
+## 6. Dependency Injection
 
-`di/AppModule.kt` 是 Koin 注册入口。Android 系统服务、DataStore、Repository、通知辅助类和 OverlayWindow 均由 Koin 提供。
+`di/AppModule.kt` is the Koin registration entry point. Koin provides Android system services, DataStore, repositories, notification helpers, and `OverlayWindow`.
 
-## 7. 关键约束
+## 7. Key Constraints
 
-- 不使用 Root 或 Shizuku。
-- 不通过接口名黑名单判断 VPN。
-- Foreground Service 运行时必须保留通知。
-- 权限申请必须由用户可见操作触发。
-- 代码中的版本、Key 和系统行为优先于文档描述。
+- Do not require Root, Shizuku, or persistent ADB privileges.
+- Do not identify VPN interfaces with an interface-name blacklist.
+- A Foreground Service must retain an ongoing notification.
+- Permission requests must originate from user-visible actions.
+- Source code takes precedence over documentation for versions, keys, and actual system behavior.

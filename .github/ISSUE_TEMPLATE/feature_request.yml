@@ -1,0 +1,33 @@
+﻿name: Feature request
+description: Suggest an improvement for Pixel Meter
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for the suggestion. English is recommended so more contributors can participate, but other languages are welcome.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem would this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: android
+    attributes:
+      label: Android constraints or affected features
+      description: Mention permissions, Foreground Service, Overlay, notification, Live Update, or background-execution implications if relevant.

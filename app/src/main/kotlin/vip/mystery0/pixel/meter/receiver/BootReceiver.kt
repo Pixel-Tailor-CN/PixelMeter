@@ -23,8 +23,8 @@ class BootReceiver : BroadcastReceiver(), KoinComponent {
             return
         }
 
-        // 直接在 onReceive 中同步执行，避免协程导致 onReceive 返回后进程被杀
-        // repository.isAutoStartServiceEnabled.value 是 StateFlow 同步读取，无需切线程
+        // Run synchronously in onReceive so the process is not killed after an asynchronous return.
+        // StateFlow value access is synchronous, so no thread switch is required.
         val isAutoStart = repository.isAutoStartServiceEnabled.value
         if (isAutoStart) {
             Log.i(TAG, "boot completed, starting service")

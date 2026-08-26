@@ -1,40 +1,36 @@
 # AGENTS.md
 
-本文件是 Pixel Meter 仓库的统一协作规范。所有开发者、自动化工具与智能体处理本仓库任务时，均应优先遵循本文件。
+This file defines the shared collaboration rules for Pixel Meter. Developers, automation, and coding agents must follow it before making changes.
 
-## 1. 协作规则
+## 1. Collaboration
 
-- 使用中文回复用户。
-- 代码注释、KDoc 与项目文档使用中文；运行日志使用英文。
-- Interface、Transport、Foreground Service、Overlay、StateFlow、Repository、Live Update 等专业术语保留英文。
-- 需求不明确时先澄清，特别是网络接口过滤、权限、Foreground Service、Overlay 和后台运行相关需求。
-- 评估功能方案时必须考虑 Android 后台限制、通知权限、Overlay 权限、Foreground Service 类型和 Google Play 政策。
-- 核心功能禁止依赖 Root、Shizuku 或 ADB 常驻权限。
-- 不在 Activity 中堆叠业务逻辑；状态与持久化逻辑应位于 ViewModel、Repository 或 DataSource。
-- 原则上单个源文件不超过 1000 行。
+- Respond in the user's language unless requested otherwise.
+- Use English for code comments, KDoc, project documentation, runtime logs, and new Git commit messages.
+- Prefer English for new Issues and Pull Requests, but allow other languages when useful.
+- Keep official terms such as Interface, Transport, Foreground Service, Overlay, StateFlow, Repository, and Live Update in English.
+- Clarify ambiguous requirements, especially around network filtering, permissions, Foreground Services, Overlays, and background execution.
+- Consider Android background limits, notification and Overlay permissions, Foreground Service types, and Google Play policy.
+- Core features must not require Root, Shizuku, or persistent ADB privileges.
+- Keep business logic out of Activities; state and persistence belong in ViewModels, repositories, or data sources.
+- Keep source files below 1,000 lines where practical.
 
-## 2. 项目定位
+## 2. Product
 
-Pixel Meter 是面向 Google Pixel 和原生/类原生 Android 设备的实时网速监控应用。
+Pixel Meter is a real-time network speed monitor for Google Pixel and stock or near-stock Android devices. It identifies physical Wi-Fi, cellular, and Ethernet networks with `ConnectivityManager.NetworkCallback`, excludes `TRANSPORT_VPN`, and reads per-interface counters with `TrafficStats.getRxBytes/getTxBytes` to avoid duplicate VPN traffic counting.
 
-核心能力是使用 `ConnectivityManager.NetworkCallback` 识别 Wi-Fi、Cellular、Ethernet 等物理网络，排除带有
-`TRANSPORT_VPN` 的虚拟网络，再通过 `TrafficStats.getRxBytes/getTxBytes` 逐接口读取流量计数，避免 VPN 场景下物理接口和虚拟接口被重复统计。
+## 3. Toolchain
 
-## 3. 工具链与版本来源
+- Module: `app/`
+- Min SDK: 31; Compile SDK / Target SDK: 37; JVM Target: 21
+- `gradle/libs.versions.toml` is the source of truth for Kotlin, AGP, Compose BOM, dependencies, and `app-version`.
+- Current major versions: Kotlin 2.4.10, AGP 9.3.2, Compose BOM 2026.08.00
+- Global opt-in: `ExperimentalMaterial3Api`
+- `versionCode`: Git commit count
+- `versionName`: `app-version` + build-type suffix + Git information
+- Locales: English, Simplified Chinese, Portuguese, Brazilian Portuguese, and Russian
+- Default resources: English; see `app/src/main/res/resources.properties`
 
-- 单模块 Android 应用：`app/`
-- Min SDK：31（Android 12）
-- Compile SDK / Target SDK：37
-- JVM Target：21
-- Kotlin、AGP、Compose BOM、依赖版本和 `app-version` 的唯一事实来源：`gradle/libs.versions.toml`
-- 当前主要版本：Kotlin 2.4.10、AGP 9.3.2、Compose BOM 2026.08.00
-- 全局 opt-in：`ExperimentalMaterial3Api`
-- `versionCode`：Git commit 数量
-- `versionName`：`app-version` + 构建类型后缀 + Git 信息
-- 当前语言资源：英语、简体中文、葡萄牙语、巴西葡萄牙语、俄语
-- 默认资源语言：英语，配置见 `app/src/main/res/resources.properties`
-
-## 4. 构建与验证
+## 4. Build and Validation
 
 ```bash
 ./gradlew :app:assembleDebug
@@ -42,121 +38,81 @@ Pixel Meter 是面向 Google Pixel 和原生/类原生 Android 设备的实时�
 ./gradlew lint
 ```
 
-Windows 可使用对应的 `gradlew.bat`。Release 构建需要签名配置。
+Use `gradlew.bat` on Windows. Release builds require signing configuration.
 
-项目默认不编写单元测试或 Android 测试，除非用户明确要求。代码变更后的最低验证要求：
+Unless explicitly requested, the project does not require unit or Android tests. After code changes, run `:app:assembleDebug` and `lint`. Validate network statistics, notifications, Overlay, or Foreground Service changes on a Pixel device. For data-source changes, verify VPN traffic is not counted twice. For resource changes, verify all `values-*` translations. Documentation-only tasks may use an explicitly approved narrower scope.
 
-1. 执行 `:app:assembleDebug`。
-2. 执行 `lint`。
-3. 涉及网速统计、通知、Overlay 或 Foreground Service 时，在 Pixel 真机验证。
-4. 涉及数据源时重点验证 VPN 开启后不会重复统计虚拟网络流量。
-5. 涉及翻译资源时确认所有 `values-*` 中的字符串完整，避免 `MissingTranslation`。
+## 5. Architecture
 
-## 5. 架构
-
-包根路径：`app/src/main/kotlin/vip/mystery0/pixel/meter/`
-
-项目采用单模块分层 MVVM：
+Package root: `app/src/main/kotlin/vip/mystery0/pixel/meter/`
 
 ```text
 SpeedDataSource
-  → 缓存物理 Network 与接口名，读取 TrafficStats
+  → caches physical Networks and interface names; reads TrafficStats
 NetworkRepository
-  → 计算实时速度，汇总 DataStore 设置为 StateFlow
+  → calculates speed and exposes DataStore settings as StateFlow
 NetworkMonitorService
-  ├→ NotificationHelper：基础通知、Bitmap 动态图标、Live Update
-  └→ OverlayWindow：Compose + WindowManager 悬浮窗
+  ├→ NotificationHelper: base notification, Bitmap icon, Live Update
+  └→ OverlayWindow: Compose + WindowManager Overlay
 MainViewModel / SettingsViewModel
-  → 将 Repository 状态提供给 Compose UI
+  → expose Repository state to Compose UI
 ```
 
-### 核心组件
+- `SpeedDataSource`: physical-interface filtering and counters; excludes `TRANSPORT_VPN` without name blacklists.
+- `DataStoreRepository`: Preferences DataStore named `pixel_pulse_preferences`.
+- `NetworkRepository`: sampling, speed calculation, and shared application state.
+- `SpeedFormatter`: common speed formatting for UI, notifications, Live Update, and Overlay.
+- `NetworkMonitorService`: Foreground Service lifecycle, notifications, and Overlay updates.
+- `NotificationHelper`: base notification, dynamic Bitmap icon, and Android 16+ Live Update.
+- `OverlayWindow`: draggable Compose Overlay with persistence, layout, immersive, and low-traffic behavior.
+- `OnboardingScreen`: three-step setup wizard.
+- `service/tile/`: Quick Settings Tiles.
+- `BootReceiver`: optional boot startup.
+- `AppModule`: Koin registrations.
 
-- `data/source/impl/SpeedDataSource.kt`
-  - 注册 `NetworkCallback`，缓存通过 Transport 过滤后的物理接口。
-  - 排除 `TRANSPORT_VPN`，不依赖 `tun0` 等固定接口名黑名单。
-- `data/repository/DataStoreRepository.kt`
-  - 封装 Preferences DataStore，名称为 `pixel_pulse_preferences`。
-  - 管理显示、主题、服务、通知、Overlay 和 Onboarding 状态。
-- `data/repository/NetworkRepository.kt`
-  - 轮询数据源并计算上下行速度，向服务和 UI 暴露 `StateFlow`。
-- `format/SpeedFormatter.kt`
-  - 统一主页、通知、Live Update、Overlay 与设置页的网速格式。
-- `service/NetworkMonitorService.kt`
-  - Foreground Service，Manifest 声明 `specialUse|dataSync`。
-  - Android 14+ 使用 `FOREGROUND_SERVICE_TYPE_SPECIAL_USE`，更低版本使用 `DATA_SYNC`。
-  - 息屏 2 分钟后暂停采样，亮屏后恢复。
-- `service/NotificationHelper.kt`
-  - 构建基础服务通知、Bitmap 动态图标和 Android 16+ Live Update。
-- `ui/overlay/OverlayWindow.kt`
-  - 通过 `ComposeView` + `WindowManager` 宿主 Compose。
-  - 支持拖拽、锁定、位置保存、横竖布局、沉浸模式隐藏和低流量自动隐藏。
-- `ui/onboarding/OnboardingScreen.kt`
-  - 三步首次设置向导，支持跳过、稍后完成、完成并启动和从设置页重新进入。
-- `service/tile/`：Quick Settings Tile，控制通知网速和 Overlay。
-- `receiver/BootReceiver.kt`：用户开启自动启动后响应开机广播并启动服务。
-- `di/AppModule.kt`：Koin 依赖注册入口。
+## 6. UI and Android Requirements
 
-## 6. UI 与功能规范
+- Use Jetpack Compose, Material 3, Material You, and edge-to-edge layouts.
+- Dynamic Color is the default; fixed colors and AMOLED Black are supported.
+- New installations enable no display method until the user selects one in Onboarding.
+- A base Foreground Service notification is always required while monitoring.
+- Live Update is Android 16+ only.
+- Overlay uses `TYPE_APPLICATION_OVERLAY` and requires `SYSTEM_ALERT_WINDOW`.
+- Check `POST_NOTIFICATIONS` only on Android 13+; do not block Android 12/12L.
+- Android 14+ Foreground Service starts must respect background restrictions.
+- `BootReceiver` must catch startup exceptions.
+- Validate Overlay, system-bar, cutout, and immersive-mode changes on a real device.
+- Explain Android and Google Play constraints when changing background-survival behavior.
 
-- 使用 Jetpack Compose、Material 3 和 Material You。
-- 默认采用动态取色；支持固定主题色和深色模式 AMOLED Black。
-- 手机设置页采用主目录 + 二级页面；宽屏设备采用双栏布局。
-- 首次安装默认不启用通知网速、Live Update 或 Overlay，由用户在向导中选择。
-- Android 需要 Foreground Service 基础通知；关闭动态通知网速不代表可以移除基础服务通知。
-- 通知动态图标绘制总网速；通知内容支持显示模式、自定义前缀、阈值和颜色。
-- Live Update 仅在 Android 16+ 使用。
-- Overlay 使用 `TYPE_APPLICATION_OVERLAY`，需要用户授权 `SYSTEM_ALERT_WINDOW`。
-- Quick Settings 使用 `TileService`，不在 Tile 中承载复杂业务逻辑。
+## 7. Localization
 
-## 7. Android 兼容性要求
+- `values/strings.xml` must remain complete English fallback resources.
+- `translatable="false"` excludes translation; it does not restrict Locale visibility.
+- Locale Config is generated from `resources.properties` and `values-*` directories.
+- Weblate manages translations. Add new translatable strings to every current Locale.
+- Preserve format arguments and XML escaping across locales.
 
-- Android 13+ 才检查 `POST_NOTIFICATIONS` 运行时权限；Android 12/12L 不得错误阻止服务启动。
-- Android 14+ Foreground Service 启动必须符合后台启动限制。
-- BootReceiver 启动服务时应捕获异常，不得使广播处理崩溃。
-- Live Update 依赖 Android 16+ API 和 `POST_PROMOTED_NOTIFICATIONS`。
-- 修改 Overlay、系统栏、刘海区域和沉浸模式行为时必须真机验证。
-- 修改电池优化或后台保活策略时，需要说明系统限制与潜在 Google Play 风险。
+See `docs/architecture/localization.md`.
 
-## 8. 国际化
+## 8. Documentation
 
-- 默认 `values/strings.xml` 必须使用英语，作为未知语言的回退资源。
-- `translatable="false"` 只表示不参与翻译，不表示仅在某个 Locale 显示。
-- Locale Config 根据 `resources.properties` 和 `values-*` 目录自动生成。
-- 翻译由 Weblate 托管；新增字符串后必须补齐当前全部语言，或明确标记不可翻译。
-- 文案、格式参数和 XML 转义必须在所有语言中保持兼容。
+Documentation index: `docs/README.md`
 
-详见 `docs/architecture/localization.md`。
+- Architecture: `docs/architecture/`
+- UI and interaction: `docs/ui/`
+- Product images: `docs/*.png`
+- Designs and plans: `docs/plans/`
+- Naming: `YYYY-MM-DD-topic-design.md` and `YYYY-MM-DD-topic-plan.md`
 
-## 9. 文档规范
+Update relevant documentation when changing architecture, DataStore, permissions, service lifecycle, or user interaction.
 
-文档索引：`docs/README.md`
+## 9. Completion Checklist
 
-- 架构说明：`docs/architecture/`
-- UI 与交互说明：`docs/ui/`
-- 现有产品截图：`docs/*.png`
-- **后续所有需求设计文档和实施计划必须放在 `docs/plans/`。**
-- 需求设计文档命名：`docs/plans/YYYY-MM-DD-主题-design.md`
-- 实施计划命名：`docs/plans/YYYY-MM-DD-主题-plan.md`
-- 同一需求的设计与实施计划使用相同主题名称。
-- 已完成且仍具长期参考价值的计划可以保留；纯临时记录应在任务结束时清理。
-- 修改架构、DataStore、权限、服务生命周期或用户交互后，应同步更新对应文档。
+Before reporting completion, check documentation, permissions and background behavior, DataStore keys and defaults, String Resource translations, required builds and Lint, device-validation needs, and that `gradle/libs.versions.toml` remains the version source of truth.
 
-## 10. 任务完成检查
+## 10. Release Signing
 
-在向用户报告任务完成前检查：
-
-- 是否新增了可复用组件，是否需要更新架构文档。
-- 是否改变了权限、后台行为、DataStore Key 或默认值。
-- 是否需要更新 README、隐私政策或 `docs/`。
-- 是否新增字符串并补齐所有语言。
-- 是否执行 Debug 构建和 Lint。
-- 是否需要真机验证 Pixel、VPN、通知、Live Update 或 Overlay 场景。
-- `gradle/libs.versions.toml` 是否仍是版本信息的唯一事实来源。
-
-## 11. Release 签名
-
-Release 签名优先从 `local.properties` 读取，缺失时回退到同名环境变量：
+Release signing reads `local.properties`, then falls back to same-named environment variables:
 
 - `SIGN_KEY_STORE_FILE`
 - `SIGN_KEY_STORE_PASSWORD`

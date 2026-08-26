@@ -1,74 +1,52 @@
-# UI 设计系统
+# UI Design System
 
-## 1. 基础原则
+## 1. Principles
 
-Pixel Meter 使用 Jetpack Compose 和 Material 3，目标是贴近 Pixel 原生系统体验：
+Pixel Meter uses Jetpack Compose and Material 3 to provide an experience consistent with Pixel and stock Android:
 
-- 使用 Material 3 标准组件。
-- 支持 Edge-to-Edge。
-- 尊重系统深色模式和字体缩放。
-- 面向用户与无障碍的文本必须国际化。
-- 系统功能受限时明确说明 Android 版本和权限条件。
+- Use standard Material 3 components.
+- Support edge-to-edge layouts.
+- Respect system dark mode and font scaling.
+- Internationalize all user-facing and accessibility text.
+- Clearly explain Android-version and permission requirements when system features are restricted.
 
-## 2. 主题
+## 2. Theme
 
 ### Dynamic Color
 
-默认使用 Material You Dynamic Color，从系统壁纸色板生成 Light/Dark ColorScheme。
+Dynamic Color is enabled by default and derives the Light or Dark `ColorScheme` from the system wallpaper palette.
 
 ### Fixed Color
 
-用户可切换固定主题色。主题代码根据选定颜色生成可用的 Material 3 色板。
+Users may choose a fixed theme color. Theme code derives a usable Material 3 palette from the selected color.
 
 ### AMOLED Black
 
-仅在以下条件同时满足时启用：
+AMOLED Black applies only when fixed-color mode is active, the system is in dark mode, and the user has enabled the option. Primary backgrounds and surfaces become pure black while preserving content contrast.
 
-- 固定主题色模式。
-- 系统处于深色模式。
-- 用户开启 AMOLED Black。
+## 3. Main Screen
 
-主要背景和 Surface 使用纯黑，同时保持内容对比度。
+The main screen shows total, upload, and download speeds; monitoring state and start/stop controls; notification and Overlay shortcuts; a Cloudflare speed-test entry; and cards for permission or service-start errors.
 
-## 3. 主界面
+The Activity owns system Intents and permission launchers. `MainViewModel` owns state and application actions.
 
-主界面展示：
+## 4. Settings
 
-- 总网速与上下行速度。
-- 监听服务状态和启动/停止操作。
-- 通知与 Overlay 快速开关。
-- Cloudflare 测速入口。
-- 权限或服务启动错误的修复卡片。
+Settings are divided into General, Notification, Overlay, Background, and About. Phones use a main directory with secondary pages. At widths of 840dp or more, settings use a two-pane layout. General settings include an entry for rerunning Onboarding.
 
-Activity 负责系统 Intent 和权限 Launcher；状态与业务操作由 MainViewModel 提供。
+## 5. Controls and Values
 
-## 4. 设置页
+- Boolean options use `SwitchPreference` or a Material 3 Switch.
+- Enumerations use `ListPreference`.
+- Continuous ranges use `SliderPreference`.
+- Exact values use `TextFieldPreference`.
+- Colors use `colorpicker-compose`.
+- UI labels must state px, dp, sp, and speed units where relevant.
 
-设置内容分为：
+## 6. Responsive Design and Accessibility
 
-- General
-- Notification
-- Overlay
-- Background
-- About
-
-手机采用主设置目录和二级页面；宽度达到 840dp 时使用双栏：左侧目录，右侧当前内容。
-
-常规设置中提供重新运行首次设置向导的入口。
-
-## 5. 控件与数值
-
-- 开关使用 `SwitchPreference` 或 Material 3 Switch。
-- 枚举设置使用 `ListPreference`。
-- 连续范围使用 `SliderPreference`。
-- 精确数值使用 `TextFieldPreference`。
-- 颜色使用 `colorpicker-compose`。
-- px、dp、sp 和网速单位应在 UI 中明确标注。
-
-## 6. 响应式与可访问性
-
-- 长页面使用 LazyColumn 或可滚动 Column。
-- 按钮组在窄屏下必须保持可读和可触达。
-- IconButton 必须提供本地化 `contentDescription`。
-- 使用 Start/End 语义支持 RTL。
-- 不依赖颜色作为唯一状态提示。
+- Long pages use `LazyColumn` or a scrollable `Column`.
+- Button groups must remain readable and reachable on narrow screens.
+- Every `IconButton` requires a localized `contentDescription`.
+- Use Start and End semantics for RTL support.
+- Do not use color as the only state indicator.

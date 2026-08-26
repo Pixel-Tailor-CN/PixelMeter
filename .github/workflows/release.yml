@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 需要完整 commit 历史以正确生成 versionCode
+          fetch-depth: 0 # The full commit history is required to generate versionCode correctly.
 
       - name: Setup JDK 21
         uses: actions/setup-java@v4

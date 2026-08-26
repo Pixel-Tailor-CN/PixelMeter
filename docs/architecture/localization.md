@@ -1,75 +1,75 @@
-# 国际化与本地化
+# Localization
 
-## 1. 当前 Locale
+## 1. Supported Locales
 
-资源目录当前包括：
+The resource directories currently include:
 
-- `values/`：默认英语
-- `values-zh-rCN/`：简体中文
-- `values-pt/`：葡萄牙语
-- `values-pt-rBR/`：巴西葡萄牙语
-- `values-ru/`：俄语
+- `values/`: default English resources
+- `values-zh-rCN/`: Simplified Chinese
+- `values-pt/`: Portuguese
+- `values-pt-rBR/`: Brazilian Portuguese
+- `values-ru/`: Russian
 
-`app_name` 等品牌资源可以标记为不可翻译。
+Brand resources such as `app_name` may be marked as non-translatable.
 
-## 2. 默认语言
+## 2. Default Language
 
-`app/src/main/res/resources.properties` 定义：
+`app/src/main/res/resources.properties` defines:
 
 ```properties
 unqualifiedResLocale=en
 ```
 
-因此 `values/strings.xml` 必须是完整英语回退资源。不能将只希望在中文环境显示的中文文案放入默认资源。
+Therefore, `values/strings.xml` must contain the complete English fallback resources. Do not place text intended only for Chinese locales in the default resource directory.
 
-`translatable="false"` 仅表示字符串不进入翻译流程，不会限制它只在某个 Locale 显示。
+`translatable="false"` only excludes a string from translation workflows. It does not limit the string to a specific Locale.
 
 ## 3. Locale Config
 
-`app/build.gradle.kts` 会：
+`app/build.gradle.kts` performs the following steps:
 
-1. 读取 `unqualifiedResLocale`。
-2. 扫描存在 `strings.xml` 的 `values-*` 目录。
-3. 校验 Android Locale qualifier。
-4. 自动设置 `localeFilters`。
-5. 使用 `generateLocaleConfig=true` 生成 App Locale Config。
+1. Reads `unqualifiedResLocale`.
+2. Scans `values-*` directories that contain `strings.xml`.
+3. Validates Android Locale qualifiers.
+4. Configures `localeFilters`.
+5. Enables `generateLocaleConfig=true` to generate the App Locale Config.
 
-新增语言时不需要手写 Locale Config，但目录名称必须符合 Android qualifier 规则。
+Adding a language does not require a manually maintained Locale Config, but the directory name must use a valid Android qualifier.
 
 ## 4. Weblate
 
-应用字符串通过 Weblate 托管。翻译提交可能由 Weblate 分支或 Pull Request 合并。
+Application strings are managed through Weblate. Translation changes may arrive from a Weblate branch or pull request.
 
-新增文案时：
+When adding text:
 
-- 使用稳定、语义明确的 String Key。
-- 默认英语先表达完整含义。
-- 保持 `%1$s`、`%1$d` 等参数数量和类型一致。
-- 对 XML 特殊字符正确转义。
-- 为所有当前 Locale 补齐翻译，否则 Lint 会报告 `MissingTranslation`。
-- 不在 Kotlin/Compose 中硬编码面向用户或无障碍的文本。
+- Use stable, semantically precise String Resource keys.
+- Express the complete meaning in the default English resource first.
+- Preserve the number and types of format arguments such as `%1$s` and `%1$d`.
+- Escape XML special characters correctly.
+- Add translations for every current Locale, or Lint will report `MissingTranslation`.
+- Do not hard-code user-facing or accessibility text in Kotlin or Compose.
 
-## 5. 数值与单位
+## 5. Values and Units
 
-`SpeedFormatter` 使用系统 Locale 格式化小数，但网速单位保持技术缩写：
+`SpeedFormatter` uses the system Locale for decimal formatting, while speed units remain technical abbreviations:
 
 - B/s
 - KB/s
 - MB/s
 - GB/s
-- Live Update 中使用更短的 K/s、M/s、G/s
+- Live Update uses the shorter K/s, M/s, and G/s forms.
 
-单位格式属于状态栏空间约束，不通过翻译资源改变。
+These unit formats are constrained by status-bar space and are not localized through String Resources.
 
-## 6. RTL 与可访问性
+## 6. RTL and Accessibility
 
-Manifest 声明 `supportsRtl=true`。新增布局时应使用 Start/End 而非固定 Left/Right，除非选项明确表示物理方向。
+The manifest declares `supportsRtl=true`. New layouts should use Start and End instead of fixed Left and Right unless an option explicitly refers to physical direction.
 
-图标按钮、通知频道描述、Tile 状态等无障碍文本必须来自 String Resource。
+Icon buttons, notification channel descriptions, Tile states, and other accessibility labels must come from String Resources.
 
-建议发布前使用伪语言或 RTL Locale 检查：
+Before release, use pseudolocales or an RTL Locale to check:
 
-- 长文本截断。
-- 设置页双栏和二级导航。
-- Onboarding 滚动和按钮布局。
-- Overlay 的 Start/End 对齐。
+- Long-text truncation.
+- Two-pane settings and secondary navigation.
+- Onboarding scrolling and button layout.
+- Overlay Start/End alignment.

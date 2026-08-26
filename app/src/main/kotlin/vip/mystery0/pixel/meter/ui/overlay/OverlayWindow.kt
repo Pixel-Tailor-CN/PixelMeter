@@ -274,7 +274,7 @@ class OverlayWindow(
                         shouldHideForLandscape || shouldHideForImmersiveMode ||
                                 shouldHideForLowTraffic
                     LaunchedEffect(shouldHideOverlay) {
-                        // 根 ComposeView 必须保持挂载并接收 WindowInsets，否则系统栏恢复时无法重新显示。
+                        // Keep the root ComposeView attached to receive WindowInsets and restore visibility with system bars.
                         composeView.visibility = View.VISIBLE
                         composeView.alpha = if (shouldHideOverlay) 0f else 1f
 

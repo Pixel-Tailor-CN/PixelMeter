@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/Mystery00/PixelMeter" alt="License"></a>
 </p>
 
-[简体中文](README_CN.md)
+[Simplified Chinese](README_CN.md)
 
 ## About
 
@@ -80,6 +80,10 @@ Detailed project documentation is available in [`docs/README.md`](docs/README.md
 The app currently includes English, Simplified Chinese, Portuguese, Brazilian Portuguese and Russian resources. Translations are managed on Weblate.
 
 [Help translate Pixel Meter](https://hosted.weblate.org/engage/pixel-meter/)
+
+## Contributing
+
+Contributions are welcome. English is the primary engineering language for code comments, documentation, and new commit messages. English is recommended for Issues and Pull Requests, but other languages are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Privacy
 

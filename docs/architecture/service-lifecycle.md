@@ -1,94 +1,57 @@
-# Foreground Service 生命周期
+# Foreground Service Lifecycle
 
-## 1. 配置
+## 1. Configuration
 
-`NetworkMonitorService` 在 Manifest 中声明：
+`NetworkMonitorService` declares `android:foregroundServiceType="specialUse|dataSync"` in the manifest and declares the `network_monitor` Special Use subtype.
 
-```xml
-android:foregroundServiceType="specialUse|dataSync"
-```
+At runtime:
 
-并声明 `network_monitor` 的 Special Use 子类型。
+- Android 14+: `FOREGROUND_SERVICE_TYPE_SPECIAL_USE`
+- Earlier supported versions: `FOREGROUND_SERVICE_TYPE_DATA_SYNC`
 
-运行时：
+## 2. Start Sources
 
-- Android 14+：`FOREGROUND_SERVICE_TYPE_SPECIAL_USE`
-- 更低的受支持版本：`FOREGROUND_SERVICE_TYPE_DATA_SYNC`
+The Service may start from the main screen, "Finish and start" in Onboarding, a Quick Settings Tile, or `BootReceiver` when auto-start is enabled.
 
-## 2. 启动来源
+Check `POST_NOTIFICATIONS` before starting on Android 13+. Android 12 and 12L do not have this runtime permission and must not be blocked by that check. If the Overlay is enabled, also check `Settings.canDrawOverlays()`.
 
-服务可能由以下入口启动：
+## 3. Initial Notification
 
-- 主界面启动按钮。
-- 首次设置向导“完成并启动”。
-- Quick Settings Tile。
-- `BootReceiver`，前提是用户启用了自动启动。
+`onStartCommand()` must call `startForeground()` immediately. The initial notification reads the current Repository configuration, including dynamic notification state, prefixes and order, display mode, text sizes, low-traffic behavior, custom color, speed unit, and minimum display unit.
 
-Android 13+ 启动前检查 `POST_NOTIFICATIONS`。Android 12/12L 没有该运行时权限，不得因为权限检查而阻止启动。
+A basic ongoing notification remains required even when dynamic notification speed is disabled.
 
-Overlay 已启用时还需检查 `Settings.canDrawOverlays()`。
+## 4. Active Operation
 
-## 3. 首次通知
+After startup, the Service:
 
-`onStartCommand()` 必须立即调用 `startForeground()`。首次通知直接读取当前 Repository 配置：
+1. Calls `NetworkRepository.startMonitoring()`.
+2. Collects the `netSpeed` StateFlow.
+3. Updates the Overlay on the main thread.
+4. Builds notifications on a background thread.
+5. Uses a visible-state fingerprint to avoid reposting equivalent notifications.
 
-- 动态通知开关。
-- 上下行前缀和顺序。
-- 显示模式。
-- 数字与单位字号。
-- 低流量阈值和动作。
-- 自定义颜色。
-- 网速单位和最低显示单位。
+It supports a basic static notification, a dynamic Bitmap small icon, and Android 16+ Live Update.
 
-即使用户关闭动态通知网速，Foreground Service 仍需要基础常驻通知。
+## 5. Screen-Off Policy
 
-## 4. 运行阶段
+- `ACTION_SCREEN_OFF` starts a two-minute timer.
+- If the screen remains off when the timer expires, Repository sampling stops while the Service stays alive.
+- `ACTION_SCREEN_ON` cancels the timer and resumes sampling if it was paused.
 
-Service 启动后：
+This reduces continuous computation while the screen is off and restores speed display when the screen turns on.
 
-1. 调用 `NetworkRepository.startMonitoring()`。
-2. 收集 `netSpeed` StateFlow。
-3. 在主线程更新 Overlay。
-4. 在后台线程构建通知。
-5. 使用通知展示指纹避免重复发布可见内容相同的通知。
+## 6. Boot Startup
 
-通知支持：
+`BootReceiver` listens for `BOOT_COMPLETED` and `QUICKBOOT_POWERON`. It calls `startForegroundService()` only when `key_auto_start_service` is true. Startup exceptions are caught and logged.
 
-- 基础静态通知。
-- Bitmap 动态小图标。
-- Android 16+ Live Update。
+## 7. Shutdown and Cleanup
 
-## 5. 屏幕休眠策略
+When destroyed, the Service cancels the speed-collection and screen-off Jobs, hides and releases the Overlay, stops Repository sampling, removes the Foreground Notification, and unregisters the screen broadcast Receiver.
 
-- 收到 `ACTION_SCREEN_OFF` 后启动 2 分钟倒计时。
-- 倒计时结束仍未亮屏时停止 Repository 采样，但保留 Service。
-- 收到 `ACTION_SCREEN_ON` 后取消倒计时；若已暂停则恢复采样。
+## 8. Android System Constraints
 
-此策略减少息屏后的持续计算，同时保证亮屏后恢复网速显示。
-
-## 6. 开机启动
-
-`BootReceiver` 监听：
-
-- `BOOT_COMPLETED`
-- `QUICKBOOT_POWERON`
-
-仅当 `key_auto_start_service` 为 true 时调用 `startForegroundService()`。启动异常会记录日志并被捕获。
-
-## 7. 停止与释放
-
-Service 销毁时：
-
-- 取消速度收集 Job。
-- 取消息屏延迟 Job。
-- 隐藏并释放 Overlay。
-- 停止 Repository 采样。
-- 移除 Foreground Notification。
-- 注销屏幕广播 Receiver。
-
-## 8. Android 系统限制
-
-- Android 14+ 对后台启动 Foreground Service 有严格限制。
-- 权限申请和普通启动应由可见 UI 或系统允许的入口触发。
-- `POST_PROMOTED_NOTIFICATIONS` 只用于可选 Live Update，不替代普通通知权限。
-- 修改启动来源、类型或保活策略时必须检查目标 SDK 行为和 Google Play 政策。
+- Android 14+ strictly limits background Foreground Service starts.
+- Permission requests and ordinary starts should originate from visible UI or another system-approved entry point.
+- `POST_PROMOTED_NOTIFICATIONS` is only for optional Live Update and does not replace ordinary notification permission.
+- Changes to start sources, service types, or survival strategies must be checked against target-SDK behavior and Google Play policy.

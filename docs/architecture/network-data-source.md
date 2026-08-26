@@ -1,78 +1,78 @@
-# 网络数据源
+# Network Data Source
 
-## 1. 目标
+## 1. Goal
 
-Pixel Meter 需要在 VPN 开启时只统计物理链路流量，避免物理接口和 VPN 虚拟网络被同时计入。
+Pixel Meter must count only physical-link traffic while a VPN is active, preventing the same bytes from being counted on both physical and virtual interfaces.
 
-## 2. 网络识别
+## 2. Network Detection
 
-`SpeedDataSource` 使用包含以下 Transport 的 `NetworkRequest` 注册 `ConnectivityManager.NetworkCallback`：
+`SpeedDataSource` registers a `ConnectivityManager.NetworkCallback` for these transports:
 
 - `TRANSPORT_WIFI`
 - `TRANSPORT_CELLULAR`
 - `TRANSPORT_ETHERNET`
 
-`onCapabilitiesChanged` and `onLinkPropertiesChanged` cache the `NetworkCapabilities` and `LinkProperties` supplied by the callbacks directly. The callbacks do not synchronously call `getNetworkCapabilities()` or `getLinkProperties()`, avoiding stale or null state returned by callback-time lookups.
+`onCapabilitiesChanged` and `onLinkPropertiesChanged` cache the `NetworkCapabilities` and `LinkProperties` supplied directly by the callbacks. They do not synchronously call `getNetworkCapabilities()` or `getLinkProperties()`, avoiding stale or null callback-time lookup results.
 
-更新缓存接口时再次校验：
+A network is added to the interface cache only when:
 
-1. Capabilities 与 LinkProperties 必须存在。
-2. 若包含 `TRANSPORT_VPN`，立即从缓存移除。
-3. 必须至少包含一种受支持的物理 Transport。
-4. `LinkProperties.interfaceName` 必须非空。
-5. 使用 `ConcurrentHashMap<Network, String>` 保存 Network 与接口名。
+1. Both capabilities and link properties are available.
+2. The capabilities do not contain `TRANSPORT_VPN`.
+3. At least one supported physical transport is present.
+4. `LinkProperties.interfaceName` is not null.
+5. The `Network` and interface name can be stored in `ConcurrentHashMap<Network, String>`.
 
-`onLost` 会删除已失效的 Network 以及对应的 callback 参数缓存。
+`onLost` removes the Network, its interface entry, and its cached callback parameters.
 
-## 3. 为什么不使用接口名黑名单
+## 3. Why There Is No Interface-Name Blacklist
 
-`tun0`、wg、ppp 等名称不是稳定的 Android API，不同 VPN、设备或系统版本可能使用不同名称。Pixel Meter 依据系统提供的 `NetworkCapabilities` 排除 `TRANSPORT_VPN`，而不是维护固定名称列表。
+VPN interface names vary by implementation and device. Names such as `tun0` are not reliable identifiers. Filtering by `TRANSPORT_VPN` follows Android's network model and avoids maintaining incomplete device-specific rules.
 
-## 4. TrafficStats 读取
+## 4. Traffic Counters
 
-采样时直接遍历缓存的接口名称，并行读取：
+For each cached physical interface, the data source reads:
 
 ```kotlin
 TrafficStats.getRxBytes(interfaceName)
 TrafficStats.getTxBytes(interfaceName)
 ```
 
-返回 `TrafficStats.UNSUPPORTED` 时按无数据处理。所有有效接口的 Rx/Tx 分别求和，生成 `NetworkTrafficData`。
+`TrafficStats.UNSUPPORTED` is ignored. Values from all valid physical interfaces are summed before being returned to the Repository.
 
-采样循环不会重复遍历所有 Network 或查询 Capabilities；ConnectivityManager 查询只发生在 Callback 更新阶段。
+The sampling loop reads cached interface names directly and does not query `ConnectivityManager` for every sample.
 
-## 5. 速度计算
+## 5. Speed Calculation
 
-`NetworkRepository` 保存上次总字节数与时间戳：
+`NetworkRepository` calculates speed from adjacent samples:
 
 ```text
 downloadSpeed = max((currentRx - previousRx) × 1000 / elapsedMs, 0)
 uploadSpeed   = max((currentTx - previousTx) × 1000 / elapsedMs, 0)
 ```
 
-Sampling durations and loop timing use `SystemClock.elapsedRealtime()`, a monotonic clock that is not affected by wall-clock corrections.
+Sampling durations and loop timing use `SystemClock.elapsedRealtime()`, a monotonic clock unaffected by wall-clock corrections.
 
-首次采样只建立基线。接口重置、计数回退或网络切换产生的负数会被限制为 0。
+The first sample establishes a baseline. Negative deltas caused by counter resets, network changes, or interface resets are clamped to zero.
 
-## 6. 并发与线程
+## 6. Concurrency and Threads
 
-- 接口缓存和 callback 参数缓存使用 `ConcurrentHashMap`。
-- 接口读取在 Coroutine 中并行执行。
-- TrafficStats 调用切换到 `Dispatchers.IO`。
-- 汇总和速度计算在后台 Dispatcher 完成。
+- Interface and callback-parameter caches use `ConcurrentHashMap`.
+- Per-interface reads run concurrently in coroutines.
+- `TrafficStats` calls use `Dispatchers.IO`.
+- Aggregation and speed calculation run on a background Dispatcher.
 
-## 7. 兼容性与验证
+## 7. Validation Scenarios
 
-主要目标为 Google Pixel，兼容实现标准 NetworkCapabilities 和 TrafficStats 行为的 Android 12+ 设备。
+Validate changes to this path on a Pixel device with:
 
-数据源变更必须真机验证：
+- Wi-Fi only.
+- Cellular only.
+- Ethernet, where available.
+- A VPN enabled and disabled.
+- Multiple simultaneous networks.
+- Network disconnection and reconnection.
+- No near-doubling of reported speed after enabling a VPN.
 
-- Wi-Fi、Cellular、Ethernet 切换。
-- VPN 开启和关闭。
-- 多网络并存。
-- 网络断开和重新连接。
-- 不应出现 VPN 导致的近似双倍速度。
+## 8. Known Limitation
 
-## 8. Known limitation
-
-A network switch or physical-interface recreation can make two adjacent samples refer to counters from different interface lifetimes. This can produce a transient one-sample speed spike. Pixel Meter intentionally does not add network-generation tracking or a dedicated baseline-reset protocol for this case, keeping the real-time data path simple; the transient spike is treated as a known limitation.
+A network switch or physical-interface recreation can cause two adjacent samples to refer to counters from different interface lifetimes, producing a transient one-sample speed spike. Pixel Meter intentionally avoids network-generation tracking or a dedicated baseline-reset protocol to keep the real-time data path simple. The transient spike is treated as a known limitation.

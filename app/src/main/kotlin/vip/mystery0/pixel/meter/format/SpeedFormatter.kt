@@ -3,11 +3,11 @@ package vip.mystery0.pixel.meter.format
 import java.util.Locale
 
 /**
- * 统一格式化主页、通知、Live Update 与悬浮窗展示的网速文本。
+ * Formats speed text consistently across the main screen, notifications, Live Update, and Overlay.
  */
 object SpeedFormatter {
     /**
-     * 根据数值大小格式化小数位数：>= 100 → 0 位，>= 10 → 1 位，否则 2 位。
+     * Selects decimal precision by value: 0 places at >= 100, 1 at >= 10, and 2 otherwise.
      */
     private fun formatFixedValue(value: Double): String {
         val pattern = when {

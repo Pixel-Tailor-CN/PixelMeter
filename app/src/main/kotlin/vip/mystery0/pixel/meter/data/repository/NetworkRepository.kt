@@ -165,7 +165,7 @@ class NetworkRepository(
     private var lastTime = 0L
 
     init {
-        // 单次文件 IO 批量读取所有偏好设置，避免多次 first() 重复触发 DataStore 读取
+        // Read all preferences in one file I/O operation instead of triggering repeated DataStore reads with first().
         runBlocking {
             dataStoreRepository.allPreferences.first().let { prefs ->
                 val hasExistingPreferences = prefs.asMap().isNotEmpty()
