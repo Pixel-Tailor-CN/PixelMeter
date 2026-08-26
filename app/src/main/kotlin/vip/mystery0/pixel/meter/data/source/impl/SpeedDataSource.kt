@@ -18,37 +18,35 @@ class SpeedDataSource(
     private val connectivityManager: ConnectivityManager
 ) : ISpeedDataSource {
     private val validInterfaces = ConcurrentHashMap<Network, String>()
+    private val networkCapabilities = ConcurrentHashMap<Network, NetworkCapabilities>()
+    private val linkProperties = ConcurrentHashMap<Network, LinkProperties>()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            capabilities: NetworkCapabilities
         ) {
-            super.onCapabilitiesChanged(network, networkCapabilities)
-            updateNetwork(
-                network,
-                networkCapabilities,
-                connectivityManager.getLinkProperties(network)
-            )
+            super.onCapabilitiesChanged(network, capabilities)
+            networkCapabilities[network] = capabilities
+            updateNetwork(network)
         }
 
-        override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
-            super.onLinkPropertiesChanged(network, linkProperties)
-            updateNetwork(
-                network,
-                connectivityManager.getNetworkCapabilities(network),
-                linkProperties
-            )
+        override fun onLinkPropertiesChanged(network: Network, properties: LinkProperties) {
+            super.onLinkPropertiesChanged(network, properties)
+            linkProperties[network] = properties
+            updateNetwork(network)
         }
 
         override fun onLost(network: Network) {
             super.onLost(network)
+            networkCapabilities.remove(network)
+            linkProperties.remove(network)
             validInterfaces.remove(network)
         }
     }
 
     init {
-        // 监听所有网络请求，但通过 updateNetwork 过滤
+        // Listen for supported physical transports and filter them again in updateNetwork.
         val request = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -57,25 +55,23 @@ class SpeedDataSource(
         connectivityManager.registerNetworkCallback(request, networkCallback)
     }
 
-    private fun updateNetwork(
-        network: Network,
-        caps: NetworkCapabilities?,
-        props: LinkProperties?
-    ) {
+    private fun updateNetwork(network: Network) {
+        val caps = networkCapabilities[network]
+        val props = linkProperties[network]
         if (caps == null || props == null) {
             validInterfaces.remove(network)
             return
         }
 
-        // 核心过滤逻辑：
-        // 显式忽略 TRANSPORT_VPN，这样就彻底避开了 tun0 等虚拟接口的重复计数
+        // Ignore VPN transports to avoid counting the virtual interface in addition to the
+        // underlying physical link.
         val isVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
         if (isVpn) {
             validInterfaces.remove(network)
             return
         }
 
-        // 检查是否是我们需要统计的物理链路类型 (虽然 Request 已经过滤了 Transport，但在 Callback若更新Caps时仍需双重确认)
+        // The request already filters transports, but capabilities may change after registration.
         val isPhysical = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
                 caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                 caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
@@ -94,18 +90,16 @@ class SpeedDataSource(
         var totalRx = 0L
         var totalTx = 0L
 
-        // 直接遍历缓存的接口名称，无需 IPC 调用查询 Capabilities
-        // 使用协程并行获取数据（虽然现在只是读取 TrafficStats，并行IO仍然有微小优势，且保持结构一致）
+        // Read cached interface names directly without querying ConnectivityManager in the
+        // sampling loop.
         val trafficDataList = validInterfaces.values.map { ifaceName ->
             async {
                 var currentRx = 0L
                 var currentTx = 0L
 
-                // API 31+ 专属方法：直接读取指定接口的计数器
                 val rx = withContext(Dispatchers.IO) { TrafficStats.getRxBytes(ifaceName) }
                 val tx = withContext(Dispatchers.IO) { TrafficStats.getTxBytes(ifaceName) }
 
-                // TrafficStats.UNSUPPORTED 值为 -1，必须处理
                 if (rx != TrafficStats.UNSUPPORTED.toLong()) {
                     currentRx += rx
                 }

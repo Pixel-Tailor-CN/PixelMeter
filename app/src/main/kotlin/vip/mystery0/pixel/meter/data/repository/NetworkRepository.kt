@@ -1,5 +1,6 @@
 package vip.mystery0.pixel.meter.data.repository
 
+import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -616,12 +617,12 @@ class NetworkRepository(
 
             while (isActive) {
                 val interval = _samplingInterval.value
-                val startTime = System.currentTimeMillis()
+                val startTime = SystemClock.elapsedRealtime()
 
                 // Get Traffic Data
                 val trafficData = dataSource.getTrafficData()
 
-                val currentTime = System.currentTimeMillis()
+                val currentTime = SystemClock.elapsedRealtime()
                 val totalRxBytes = trafficData.rxBytes
                 val totalTxBytes = trafficData.txBytes
 
@@ -649,7 +650,7 @@ class NetworkRepository(
                 }
 
                 // Delay to achieve the desired interval
-                val delayMills = interval - (System.currentTimeMillis() - startTime)
+                val delayMills = interval - (SystemClock.elapsedRealtime() - startTime)
                 delay(delayMills.coerceAtLeast(0))
             }
         }

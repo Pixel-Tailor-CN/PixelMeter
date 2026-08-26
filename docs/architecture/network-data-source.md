@@ -12,7 +12,9 @@ Pixel Meter 需要在 VPN 开启时只统计物理链路流量，避免物理接
 - `TRANSPORT_CELLULAR`
 - `TRANSPORT_ETHERNET`
 
-在 `onCapabilitiesChanged` 和 `onLinkPropertiesChanged` 中再次校验：
+`onCapabilitiesChanged` and `onLinkPropertiesChanged` cache the `NetworkCapabilities` and `LinkProperties` supplied by the callbacks directly. The callbacks do not synchronously call `getNetworkCapabilities()` or `getLinkProperties()`, avoiding stale or null state returned by callback-time lookups.
+
+更新缓存接口时再次校验：
 
 1. Capabilities 与 LinkProperties 必须存在。
 2. 若包含 `TRANSPORT_VPN`，立即从缓存移除。
@@ -20,7 +22,7 @@ Pixel Meter 需要在 VPN 开启时只统计物理链路流量，避免物理接
 4. `LinkProperties.interfaceName` 必须非空。
 5. 使用 `ConcurrentHashMap<Network, String>` 保存 Network 与接口名。
 
-`onLost` 会删除已失效的 Network。
+`onLost` 会删除已失效的 Network 以及对应的 callback 参数缓存。
 
 ## 3. 为什么不使用接口名黑名单
 
@@ -48,11 +50,13 @@ downloadSpeed = max((currentRx - previousRx) × 1000 / elapsedMs, 0)
 uploadSpeed   = max((currentTx - previousTx) × 1000 / elapsedMs, 0)
 ```
 
+Sampling durations and loop timing use `SystemClock.elapsedRealtime()`, a monotonic clock that is not affected by wall-clock corrections.
+
 首次采样只建立基线。接口重置、计数回退或网络切换产生的负数会被限制为 0。
 
 ## 6. 并发与线程
 
-- 接口缓存使用 `ConcurrentHashMap`，允许 Callback 与采样并发访问。
+- 接口缓存和 callback 参数缓存使用 `ConcurrentHashMap`。
 - 接口读取在 Coroutine 中并行执行。
 - TrafficStats 调用切换到 `Dispatchers.IO`。
 - 汇总和速度计算在后台 Dispatcher 完成。
@@ -68,3 +72,7 @@ uploadSpeed   = max((currentTx - previousTx) × 1000 / elapsedMs, 0)
 - 多网络并存。
 - 网络断开和重新连接。
 - 不应出现 VPN 导致的近似双倍速度。
+
+## 8. Known limitation
+
+A network switch or physical-interface recreation can make two adjacent samples refer to counters from different interface lifetimes. This can produce a transient one-sample speed spike. Pixel Meter intentionally does not add network-generation tracking or a dedicated baseline-reset protocol for this case, keeping the real-time data path simple; the transient spike is treated as a known limitation.
