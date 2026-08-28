@@ -6,7 +6,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -23,6 +27,15 @@ class NetworkRepository(
     private val dataSource: SpeedDataSource,
     private val dataStoreRepository: DataStoreRepository,
 ) : KoinComponent {
+    private val _speedSamples = MutableSharedFlow<NetSpeedData>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    ).apply {
+        tryEmit(NetSpeedData(0, 0))
+    }
+    val speedSamples: SharedFlow<NetSpeedData> = _speedSamples.asSharedFlow()
+
     private val _isOnboardingShown = MutableStateFlow(false)
     val isOnboardingShown: StateFlow<Boolean> = _isOnboardingShown.asStateFlow()
 
@@ -168,6 +181,8 @@ class NetworkRepository(
 
     private var monitoringJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Default)
+    private val monitoringStateLock = Any()
+    private var monitoringGeneration = 0L
 
     private var lastTotalRxBytes = 0L
     private var lastTotalTxBytes = 0L
@@ -648,10 +663,13 @@ class NetworkRepository(
         Log.i(TAG, "request start monitoring")
         if (monitoringJob?.isActive == true) return
 
-        // Reset state
-        lastTotalRxBytes = 0L
-        lastTotalTxBytes = 0L
-        lastTime = 0L
+        val generation = synchronized(monitoringStateLock) {
+            monitoringGeneration += 1
+            lastTotalRxBytes = 0L
+            lastTotalTxBytes = 0L
+            lastTime = 0L
+            monitoringGeneration
+        }
 
         _isMonitoring.value = true
 
@@ -670,26 +688,32 @@ class NetworkRepository(
                 val totalTxBytes = trafficData.txBytes
 
                 withContext(Dispatchers.Default) {
-                    if (lastTime != 0L) {
-                        val timeDelta = currentTime - lastTime
-                        val rxDelta = totalRxBytes - lastTotalRxBytes
-                        val txDelta = totalTxBytes - lastTotalTxBytes
+                    synchronized(monitoringStateLock) {
+                        if (generation != monitoringGeneration) return@synchronized
 
-                        if (timeDelta > 0) {
-                            // Calculate speed
-                            val downloadSpeed = ((rxDelta * 1000) / timeDelta).coerceAtLeast(0)
-                            val uploadSpeed = ((txDelta * 1000) / timeDelta).coerceAtLeast(0)
+                        if (lastTime != 0L) {
+                            val timeDelta = currentTime - lastTime
+                            val rxDelta = totalRxBytes - lastTotalRxBytes
+                            val txDelta = totalTxBytes - lastTotalTxBytes
 
-                            _netSpeed.value = NetSpeedData(
-                                downloadSpeed.coerceAtLeast(0),
-                                uploadSpeed.coerceAtLeast(0)
-                            )
+                            if (timeDelta > 0) {
+                                // Calculate speed
+                                val downloadSpeed = ((rxDelta * 1000) / timeDelta).coerceAtLeast(0)
+                                val uploadSpeed = ((txDelta * 1000) / timeDelta).coerceAtLeast(0)
+
+                                val speed = NetSpeedData(
+                                    downloadSpeed.coerceAtLeast(0),
+                                    uploadSpeed.coerceAtLeast(0)
+                                )
+                                _netSpeed.value = speed
+                                _speedSamples.tryEmit(speed)
+                            }
                         }
-                    }
 
-                    lastTotalRxBytes = totalRxBytes
-                    lastTotalTxBytes = totalTxBytes
-                    lastTime = currentTime
+                        lastTotalRxBytes = totalRxBytes
+                        lastTotalTxBytes = totalTxBytes
+                        lastTime = currentTime
+                    }
                 }
 
                 // Delay to achieve the desired interval
@@ -704,7 +728,12 @@ class NetworkRepository(
         monitoringJob?.cancel()
         monitoringJob = null
         _isMonitoring.value = false
-        _netSpeed.value = NetSpeedData(0, 0)
+        synchronized(monitoringStateLock) {
+            monitoringGeneration += 1
+            val stoppedSpeed = NetSpeedData(0, 0)
+            _netSpeed.value = stoppedSpeed
+            _speedSamples.tryEmit(stoppedSpeed)
+        }
     }
 
     companion object {

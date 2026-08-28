@@ -111,7 +111,7 @@ class NetworkMonitorService : Service() {
         repository.startMonitoring()
 
         serviceJob = scope.launch {
-            repository.netSpeed.collect { speed ->
+            repository.speedSamples.collect { speed ->
                 // Overlay logic
                 withContext(Dispatchers.Main) {
                     try {
