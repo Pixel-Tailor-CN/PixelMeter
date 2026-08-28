@@ -147,6 +147,7 @@ class OverlayWindow(
                     val overlayX by repository.overlayX.collectAsState()
                     val overlayY by repository.overlayY.collectAsState()
                     val direction by repository.overlayDirection.collectAsState()
+                    val displayMode by repository.overlayDisplayMode.collectAsState()
                     val alignment by repository.overlayAlignment.collectAsState()
                     val meterSpacing by repository.overlayMeterSpacing.collectAsState()
                     val isOverlayPortraitOnly by repository.isOverlayPortraitOnly.collectAsState()
@@ -157,12 +158,14 @@ class OverlayWindow(
                     val isOverlayUseDefaultColors by repository.isOverlayUseDefaultColors.collectAsState()
                     val speedUnit by repository.speedUnit.collectAsState()
                     val minSpeedUnit by repository.minSpeedUnit.collectAsState()
+                    val speedRateUnit by repository.speedRateUnit.collectAsState()
                     val context = LocalContext.current
                     val initialConfig = LocalConfiguration.current
                     var orientation by remember { mutableIntStateOf(initialConfig.orientation) }
                     var isStatusBarVisible by remember { mutableStateOf(true) }
                     var isNavigationBarVisible by remember { mutableStateOf(true) }
                     var lowTrafficSamples by remember { mutableIntStateOf(0) }
+                    var lowTrafficDisplayMode by remember { mutableIntStateOf(displayMode) }
 
                     DisposableEffect(context) {
                         val callbacks = object : ComponentCallbacks {
@@ -255,11 +258,21 @@ class OverlayWindow(
                     val shouldHideForImmersiveMode =
                         isOverlayHideInImmersiveMode &&
                                 (!isStatusBarVisible || !isNavigationBarVisible)
-                    LaunchedEffect(speedUpdateVersion, overlayAutoHideThreshold) {
+                    val lowTrafficSpeed = when (displayMode) {
+                        1 -> speedState.uploadSpeed
+                        2 -> speedState.downloadSpeed
+                        else -> speedState.totalSpeed
+                    }
+                    LaunchedEffect(speedUpdateVersion, overlayAutoHideThreshold, displayMode) {
+                        if (displayMode != lowTrafficDisplayMode) {
+                            lowTrafficDisplayMode = displayMode
+                            lowTrafficSamples = 0
+                            return@LaunchedEffect
+                        }
                         lowTrafficSamples = when {
                             speedUpdateVersion == 0L -> 0
                             overlayAutoHideThreshold <= 0L -> 0
-                            speedState.totalSpeed < overlayAutoHideThreshold ->
+                            lowTrafficSpeed < overlayAutoHideThreshold ->
                                 (lowTrafficSamples + 1)
                                     .coerceAtMost(LOW_TRAFFIC_HIDE_SAMPLE_COUNT)
 
@@ -307,10 +320,12 @@ class OverlayWindow(
                         textDown = textDown,
                         upFirst = upFirst,
                         direction = direction,
+                        displayMode = displayMode,
                         alignment = alignment,
                         meterSpacing = meterSpacing,
                         speedUnit = speedUnit,
                         minSpeedUnit = minSpeedUnit,
+                        speedRateUnit = speedRateUnit,
                         onDrag = { x, y ->
                             if (!isLocked) {
                                 params?.let { p ->
@@ -370,13 +385,17 @@ fun OverlayContent(
     textDown: String,
     upFirst: Boolean,
     direction: Int = 0,
+    displayMode: Int = 0,
     alignment: Int = 0,
     meterSpacing: Int = 8,
     speedUnit: Int = 0,
     minSpeedUnit: Int = 0,
+    speedRateUnit: Int = 0,
     onDrag: (Float, Float) -> Unit,
     onDragEnd: () -> Unit
 ) {
+    val textColorValue = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(textColor)
+    val textStyle = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp)
     Surface(
         shape = RoundedCornerShape(cornerRadius.dp),
         color = when {
@@ -394,22 +413,39 @@ fun OverlayContent(
             )
         }
     ) {
-        val upSpeedStr =
-            SpeedFormatter.formatSpeedLine(speed.uploadSpeed, speedUnit, minSpeedUnit)
-        val downSpeedStr =
-            SpeedFormatter.formatSpeedLine(speed.downloadSpeed, speedUnit, minSpeedUnit)
+        val upSpeed = SpeedFormatter.formatSpeedLine(
+            speed.uploadSpeed, speedUnit, minSpeedUnit, speedRateUnit
+        )
+        val downSpeed = SpeedFormatter.formatSpeedLine(
+            speed.downloadSpeed, speedUnit, minSpeedUnit, speedRateUnit
+        )
+        val singleText = when (displayMode) {
+            1 -> "$textUp$upSpeed"
+            2 -> "$textDown$downSpeed"
+            3 -> SpeedFormatter.formatSpeedLine(
+                speed.totalSpeed, speedUnit, minSpeedUnit, speedRateUnit
+            )
+            else -> null
+        }
+        if (singleText != null) {
+            Text(
+                text = singleText,
+                modifier = Modifier.padding(
+                    horizontal = padding.coerceAtLeast(0).dp,
+                    vertical = (padding / 2).coerceAtLeast(0).dp
+                ),
+                style = textStyle,
+                color = textColorValue
+            )
+            return@Surface
+        }
 
         val prefix1 = if (upFirst) textUp else textDown
         val prefix2 = if (upFirst) textDown else textUp
-        val speed1 = if (upFirst) upSpeedStr else downSpeedStr
-        val speed2 = if (upFirst) downSpeedStr else upSpeedStr
-
-        val text1 = "$prefix1$speed1"
-        val text2 = "$prefix2$speed2"
+        val speed1 = if (upFirst) upSpeed else downSpeed
+        val speed2 = if (upFirst) downSpeed else upSpeed
 
         if (direction == 0) {
-            val effectiveMeterSpacing = meterSpacing.coerceAtLeast(0)
-            // Horizontal
             Row(
                 modifier = Modifier.padding(
                     horizontal = padding.coerceAtLeast(0).dp,
@@ -417,24 +453,11 @@ fun OverlayContent(
                 ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = text1,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                    color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                        textColor
-                    )
-                )
-                Spacer(modifier = Modifier.width(effectiveMeterSpacing.dp))
-                Text(
-                    text = text2,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                    color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                        textColor
-                    )
-                )
+                Text(text = "$prefix1$speed1", style = textStyle, color = textColorValue)
+                Spacer(modifier = Modifier.width(meterSpacing.coerceAtLeast(0).dp))
+                Text(text = "$prefix2$speed2", style = textStyle, color = textColorValue)
             }
         } else {
-            // Vertical
             val horizontalAlignment = when (alignment) {
                 1 -> Alignment.CenterHorizontally
                 2 -> Alignment.End
@@ -447,41 +470,13 @@ fun OverlayContent(
                 ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = prefix1,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                        color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                            textColor
-                        )
-                    )
-                    Text(
-                        text = prefix2,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                        color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                            textColor
-                        )
-                    )
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(text = prefix1, style = textStyle, color = textColorValue)
+                    Text(text = prefix2, style = textStyle, color = textColorValue)
                 }
-                Column(
-                    horizontalAlignment = horizontalAlignment
-                ) {
-                    Text(
-                        text = speed1,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                        color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                            textColor
-                        )
-                    )
-                    Text(
-                        text = speed2,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = textSize.sp),
-                        color = if (useDefaultColors) MaterialTheme.colorScheme.onSurface else Color(
-                            textColor
-                        )
-                    )
+                Column(horizontalAlignment = horizontalAlignment) {
+                    Text(text = speed1, style = textStyle, color = textColorValue)
+                    Text(text = speed2, style = textStyle, color = textColorValue)
                 }
             }
         }

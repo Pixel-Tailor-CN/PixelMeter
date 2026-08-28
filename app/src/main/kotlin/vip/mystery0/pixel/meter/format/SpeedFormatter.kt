@@ -1,110 +1,122 @@
 package vip.mystery0.pixel.meter.format
 
 import java.util.Locale
+import kotlin.math.roundToLong
 
-/**
- * Formats speed text consistently across the main screen, notifications, Live Update, and Overlay.
- */
+/** Formats speed text consistently across every display surface. */
 object SpeedFormatter {
-    /**
-     * Selects decimal precision by value: 0 places at >= 100, 1 at >= 10, and 2 otherwise.
-     */
+    private const val RATE_BITS = 1
+
     private fun formatFixedValue(value: Double): String {
         val pattern = when {
             value >= 100 -> "%.0f"
             value >= 10 -> "%.1f"
             else -> "%.2f"
         }
-        return pattern.format(Locale.getDefault(), value)
+        return pattern.format(Locale.ROOT, value)
     }
 
-    fun formatSpeedTextForLiveUpdate(
-        bytes: Long,
-        speedUnit: Int = 0,
-        minSpeedUnit: Int = 0
-    ): String {
-        if (minSpeedUnit > 0 && speedUnit == 0) {
-            val threshold = when (minSpeedUnit) {
-                1 -> 1024L
-                2 -> 1048576L
-                3 -> 1073741824L
-                else -> 0L
-            }
-            if (bytes < threshold) {
-                return "0" + when (minSpeedUnit) {
-                    1 -> "K/s"
-                    2 -> "M/s"
-                    3 -> "G/s"
-                    else -> "B/s"
-                }
-            }
-        }
+    private fun normalizedRateUnit(rateUnit: Int): Int = if (rateUnit == RATE_BITS) RATE_BITS else 0
+    private fun normalizedBytes(bytes: Long): Long = bytes.coerceAtLeast(0)
+    private fun rateValue(bytes: Long, rateUnit: Int): Double =
+        normalizedBytes(bytes).toDouble() * if (normalizedRateUnit(rateUnit) == RATE_BITS) 8.0 else 1.0
 
-        when (speedUnit) {
-            1 -> return "${formatFixedValue(bytes.toDouble())}B/s"
-            2 -> return "${formatFixedValue(bytes / 1024.0)}K/s"
-            3 -> return "${formatFixedValue(bytes / 1048576.0)}M/s"
-            4 -> return "${formatFixedValue(bytes / 1073741824.0)}G/s"
+    private fun base(rateUnit: Int): Double = if (normalizedRateUnit(rateUnit) == RATE_BITS) 1000.0 else 1024.0
+
+    private fun divisor(unit: Int, rateUnit: Int): Double {
+        val base = base(rateUnit)
+        return when (unit) {
+            2 -> base
+            3 -> base * base
+            4 -> base * base * base
+            else -> 1.0
         }
-        if (bytes < 1024) return "${bytes}B/s"
-        val kb = bytes / 1024.0
-        if (kb < 1000) return "${"%.0f".format(Locale.getDefault(), kb)}K/s"
-        val mb = kb / 1024.0
-        if (mb < 1000) {
-            return if (mb < 100) "${"%.1f".format(Locale.getDefault(), mb)}M/s"
-            else "${"%.0f".format(Locale.getDefault(), mb)}M/s"
+    }
+
+    private fun fullUnit(unit: Int, rateUnit: Int): String {
+        val bits = normalizedRateUnit(rateUnit) == RATE_BITS
+        return when (unit) {
+            2 -> if (bits) "kb/s" else "KB/s"
+            3 -> if (bits) "Mb/s" else "MB/s"
+            4 -> if (bits) "Gb/s" else "GB/s"
+            else -> if (bits) "b/s" else "B/s"
         }
-        val gb = mb / 1024.0
-        return "${"%.1f".format(Locale.getDefault(), gb)}G/s"
+    }
+
+    private fun compactUnit(unit: Int, rateUnit: Int): String {
+        val bits = normalizedRateUnit(rateUnit) == RATE_BITS
+        return when (unit) {
+            2 -> if (bits) "k/s" else "K/s"
+            3 -> "M/s"
+            4 -> "G/s"
+            else -> if (bits) "b/s" else "B/s"
+        }
+    }
+
+    private fun minimumUnitIndex(minSpeedUnit: Int): Int = when (minSpeedUnit) {
+        1 -> 2
+        2 -> 3
+        3 -> 4
+        else -> 1
+    }
+
+    fun formatSpeedTextForLiveUpdate(bytes: Long, rateUnit: Int = 0): String {
+        val value = rateValue(bytes, rateUnit)
+        val base = base(rateUnit)
+        if (value < base) return "${value.toLong()}${compactUnit(1, rateUnit)}"
+        val kilo = value / base
+        if (kilo < base) return "${"%.0f".format(Locale.ROOT, kilo)}${compactUnit(2, rateUnit)}"
+        val mega = kilo / base
+        if (mega < base) {
+            return if (mega < 100) "${"%.1f".format(Locale.ROOT, mega)}${compactUnit(3, rateUnit)}"
+            else "${"%.0f".format(Locale.ROOT, mega)}${compactUnit(3, rateUnit)}"
+        }
+        return "${"%.1f".format(Locale.ROOT, mega / base)}${compactUnit(4, rateUnit)}"
     }
 
     fun formatSpeedText(
         bytes: Long,
         speedUnit: Int = 0,
-        minSpeedUnit: Int = 0
+        minSpeedUnit: Int = 0,
+        rateUnit: Int = 0
     ): Pair<String, String> {
+        val value = rateValue(bytes, rateUnit)
         if (minSpeedUnit > 0 && speedUnit == 0) {
-            val threshold = when (minSpeedUnit) {
-                1 -> 1024L
-                2 -> 1048576L
-                3 -> 1073741824L
-                else -> 0L
-            }
-            if (bytes < threshold) {
-                val unit = when (minSpeedUnit) {
-                    1 -> "KB/s"
-                    2 -> "MB/s"
-                    3 -> "GB/s"
-                    else -> "B/s"
-                }
-                return "0" to unit
-            }
+            val unitIndex = minimumUnitIndex(minSpeedUnit)
+            if (value < divisor(unitIndex, rateUnit)) return "0" to fullUnit(unitIndex, rateUnit)
         }
-
-        when (speedUnit) {
-            1 -> return formatFixedValue(bytes.toDouble()) to "B/s"
-            2 -> return formatFixedValue(bytes / 1024.0) to "KB/s"
-            3 -> return formatFixedValue(bytes / 1048576.0) to "MB/s"
-            4 -> return formatFixedValue(bytes / 1073741824.0) to "GB/s"
+        if (speedUnit in 1..4) {
+            return formatFixedValue(value / divisor(speedUnit, rateUnit)) to fullUnit(speedUnit, rateUnit)
         }
-        if (bytes < 1024) return bytes.toString() to "B/s"
-        val kb = bytes / 1024.0
-        if (kb < 1000) return "%.0f".format(Locale.getDefault(), kb) to "KB/s"
-        val mb = kb / 1024.0
-        if (mb < 1000) {
-            return if (mb < 10) "%.1f".format(Locale.getDefault(), mb) to "MB/s"
-            else "%.0f".format(Locale.getDefault(), mb) to "MB/s"
+        val base = base(rateUnit)
+        if (value < base) return value.toLong().toString() to fullUnit(1, rateUnit)
+        val kilo = value / base
+        if (kilo < base) return "%.0f".format(Locale.ROOT, kilo) to fullUnit(2, rateUnit)
+        val mega = kilo / base
+        if (mega < base) {
+            return if (mega < 10) "%.1f".format(Locale.ROOT, mega) to fullUnit(3, rateUnit)
+            else "%.0f".format(Locale.ROOT, mega) to fullUnit(3, rateUnit)
         }
-        val gb = mb / 1024.0
-        return "%.1f".format(Locale.getDefault(), gb) to "GB/s"
+        return "%.1f".format(Locale.ROOT, mega / base) to fullUnit(4, rateUnit)
     }
 
-    fun formatSpeedLine(
-        bytes: Long,
-        speedUnit: Int = 0,
-        minSpeedUnit: Int = 0
-    ): String {
-        val (value, unit) = formatSpeedText(bytes, speedUnit, minSpeedUnit)
+    fun formatSpeedLine(bytes: Long, speedUnit: Int = 0, minSpeedUnit: Int = 0, rateUnit: Int = 0): String {
+        val (value, unit) = formatSpeedText(bytes, speedUnit, minSpeedUnit, rateUnit)
         return "$value$unit"
+    }
+
+    fun formatThresholdInputValue(bytes: Long, rateUnit: Int): String {
+        val value = normalizedBytes(bytes).toDouble() / if (normalizedRateUnit(rateUnit) == RATE_BITS) 125.0 else 1024.0
+        return "%.3f".format(Locale.ROOT, value).trimEnd('0').trimEnd('.')
+    }
+
+    fun parseThresholdInputValue(text: String, rateUnit: Int): Long? {
+        val normalizedText = text.trim()
+        if (!normalizedText.matches(Regex("^(?:\\d+\\.?\\d*|\\.\\d+)$"))) return null
+        val value = normalizedText.toDoubleOrNull() ?: return null
+        if (!value.isFinite() || value < 0) return null
+        val bytes = value * if (normalizedRateUnit(rateUnit) == RATE_BITS) 125.0 else 1024.0
+        if (!bytes.isFinite() || bytes > Long.MAX_VALUE.toDouble()) return null
+        return bytes.roundToLong()
     }
 }

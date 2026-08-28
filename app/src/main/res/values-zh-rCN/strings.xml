@@ -26,6 +26,13 @@
     <string name="settings_sampling_interval">数据采样间隔时间</string>
     <string name="settings_sampling_interval_desc">过低的间隔时间会导致结果准确度降低，过高的间隔时间结果更准确，但是更新的很慢</string>
     <string name="settings_speed_unit_title">网速单位</string>
+    <string name="settings_speed_rate_unit_title">速率单位</string>
+    <string name="settings_speed_rate_unit_desc">字节单位沿用现有的 1024 进制。比特单位使用十进制 SI（1 Mb/s = 1,000,000 bits/s）。</string>
+    <string name="settings_speed_rate_unit_bytes">字节 (B/s)</string>
+    <string name="settings_speed_rate_unit_bits">比特 (b/s)</string>
+    <string name="settings_overlay_display_mode">悬浮窗显示内容</string>
+    <string name="settings_display_mode_both">上传和下载</string>
+    <string name="settings_notification_icon_mode">状态栏图标</string>
     <string name="settings_speed_unit_desc">锁定网速显示的计量单位</string>
     <string name="settings_min_speed_unit_title">最小显示单位</string>
     <string name="settings_min_speed_unit_desc">当网速低于此单位时显示为0，仅在“网速单位”为自动时生效</string>
@@ -49,7 +56,7 @@
     <string name="settings_lock_overlay">锁定悬浮窗位置</string>
     <string name="config_lock_overlay_desc">防止悬浮窗被移动</string>
     <string name="settings_overlay_show_on_status_bar">允许显示到状态栏区域</string>
-    <string name="settings_overlay_show_on_status_bar_desc">开启后悬浮窗可以被拖拽到状态栏上方，并适配刘海屏区域，关闭时按默认状态显示</string>
+    <string name="settings_overlay_show_on_status_bar_desc">将悬浮窗放置在状态栏区域。这不是系统状态栏指示器，可能受挖孔摄像头和系统图标影响。</string>
     <string name="settings_overlay_position_x">X 坐标</string>
     <string name="settings_overlay_position_x_desc">横向位置，单位 px。允许输入负数。</string>
     <string name="settings_overlay_position_y">Y 坐标</string>
@@ -61,8 +68,8 @@
     <string name="settings_overlay_auto_hide_threshold">自动隐藏阈值</string>
     <string name="settings_overlay_auto_hide_threshold_desc">网速持续低于 %1$s 后隐藏悬浮窗</string>
     <string name="settings_overlay_auto_hide_threshold_disabled">自动隐藏已禁用</string>
-    <string name="settings_overlay_auto_hide_threshold_input_title">自定义隐藏阈值 (KB/s)</string>
-    <string name="settings_overlay_auto_hide_threshold_input_summary">直接输入阈值数值，单位为 KB/s。输入 0 可禁用。</string>
+    <string name="settings_overlay_auto_hide_threshold_input_title">自定义自动隐藏阈值 (%1$s)</string>
+    <string name="settings_overlay_auto_hide_threshold_input_summary">直接以 %1$s 输入阈值。输入 0 可关闭。</string>
     <string name="settings_overlay_use_default_colors">使用默认颜色</string>
     <string name="settings_overlay_use_default_colors_desc">悬浮窗颜色跟随系统主题（深色/浅色）自动调整</string>
     <string name="settings_overlay_hide_background">隐藏背景</string>
@@ -99,8 +106,8 @@
     <string name="settings_notification_threshold">网速通知阈值</string>
     <string name="settings_notification_threshold_desc">当网速低于阈值 (%1$s) 时，进入低流量模式</string>
     <string name="settings_notification_threshold_disabled">低流量模式已禁用</string>
-    <string name="settings_notification_threshold_input_title">精准阈值设置 (KB/s)</string>
-    <string name="settings_notification_threshold_input_summary">直接输入阈值数值，单位为 KB/s</string>
+    <string name="settings_notification_threshold_input_title">自定义阈值 (%1$s)</string>
+    <string name="settings_notification_threshold_input_summary">直接以 %1$s 输入阈值</string>
     <string name="settings_notification_low_traffic_mode">低流量模式动作</string>
     <string name="settings_notification_low_traffic_mode_static">显示静态图标</string>
     <string name="settings_notification_low_traffic_mode_dynamic">显示动态网速</string>

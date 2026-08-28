@@ -47,6 +47,7 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         val KEY_NOTIFICATION_ORDER_UP_FIRST =
             booleanPreferencesKey("key_notification_order_up_first")
         val KEY_NOTIFICATION_DISPLAY_MODE = intPreferencesKey("key_notification_display_mode")
+        val KEY_NOTIFICATION_ICON_MODE = intPreferencesKey("key_notification_icon_mode")
         val KEY_NOTIFICATION_TEXT_SIZE = floatPreferencesKey("key_notification_text_size")
         val KEY_NOTIFICATION_UNIT_SIZE = floatPreferencesKey("key_notification_unit_size")
 
@@ -61,11 +62,13 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         val KEY_NOTIFICATION_COLOR = intPreferencesKey("key_notification_color")
         val KEY_SPEED_UNIT = intPreferencesKey("key_speed_unit")
         val KEY_MIN_SPEED_UNIT = intPreferencesKey("key_min_speed_unit")
+        val KEY_SPEED_RATE_UNIT = intPreferencesKey("key_speed_rate_unit")
         val KEY_APP_THEME_MODE = intPreferencesKey("key_app_theme_mode")
         val KEY_APP_THEME_COLOR = intPreferencesKey("key_app_theme_color")
         val KEY_APP_THEME_USE_AMOLED_BLACK =
             booleanPreferencesKey("key_app_theme_use_amoled_black")
         val KEY_OVERLAY_DIRECTION = intPreferencesKey("key_overlay_direction")
+        val KEY_OVERLAY_DISPLAY_MODE = intPreferencesKey("key_overlay_display_mode")
         val KEY_OVERLAY_ALIGNMENT = intPreferencesKey("key_overlay_alignment")
         val KEY_OVERLAY_METER_SPACING = intPreferencesKey("key_overlay_meter_spacing")
         val KEY_OVERLAY_PORTRAIT_ONLY = booleanPreferencesKey("key_overlay_portrait_only")
@@ -74,6 +77,10 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         val KEY_OVERLAY_AUTO_HIDE_THRESHOLD =
             longPreferencesKey("key_overlay_auto_hide_threshold")
         val KEY_ONBOARDING_SHOWN = booleanPreferencesKey("key_onboarding_shown")
+
+        fun normalizeSpeedRateUnit(value: Int): Int = if (value == 1) 1 else 0
+        fun normalizeOverlayDisplayMode(value: Int): Int = if (value in 0..3) value else 0
+        fun normalizeNotificationIconMode(value: Int): Int = if (value in 0..2) value else 0
     }
 
     val isOnboardingShown: Flow<Boolean> = dataStore.data
@@ -173,6 +180,11 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
             preferences[KEY_OVERLAY_DIRECTION] ?: 0 // 0: Horizontal, 1: Vertical
         }
 
+    val overlayDisplayMode: Flow<Int> = dataStore.data
+        .map { preferences ->
+            normalizeOverlayDisplayMode(preferences[KEY_OVERLAY_DISPLAY_MODE] ?: 0)
+        }
+
     val overlayAlignment: Flow<Int> = dataStore.data
         .map { preferences ->
             preferences[KEY_OVERLAY_ALIGNMENT] ?: 0 // 0: Start, 1: Center, 2: End
@@ -200,7 +212,12 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
 
     val notificationDisplayMode: Flow<Int> = dataStore.data
         .map { preferences ->
-            preferences[KEY_NOTIFICATION_DISPLAY_MODE] ?: 0 // 0: Total, 1: Up, 2: Down
+            preferences[KEY_NOTIFICATION_DISPLAY_MODE] ?: 0 // 0: Both, 1: Up, 2: Down
+        }
+
+    val notificationIconMode: Flow<Int> = dataStore.data
+        .map { preferences ->
+            normalizeNotificationIconMode(preferences[KEY_NOTIFICATION_ICON_MODE] ?: 0)
         }
 
     val notificationTextSize: Flow<Float> = dataStore.data
@@ -378,6 +395,12 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun setOverlayDisplayMode(mode: Int) {
+        dataStore.edit { preferences ->
+            preferences[KEY_OVERLAY_DISPLAY_MODE] = normalizeOverlayDisplayMode(mode)
+        }
+    }
+
     suspend fun setOverlayAlignment(alignment: Int) {
         dataStore.edit { preferences ->
             preferences[KEY_OVERLAY_ALIGNMENT] = alignment
@@ -411,6 +434,12 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setNotificationDisplayMode(mode: Int) {
         dataStore.edit { preferences ->
             preferences[KEY_NOTIFICATION_DISPLAY_MODE] = mode
+        }
+    }
+
+    suspend fun setNotificationIconMode(mode: Int) {
+        dataStore.edit { preferences ->
+            preferences[KEY_NOTIFICATION_ICON_MODE] = normalizeNotificationIconMode(mode)
         }
     }
 
@@ -515,6 +544,17 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setSpeedUnit(unit: Int) {
         dataStore.edit { preferences ->
             preferences[KEY_SPEED_UNIT] = unit
+        }
+    }
+
+    val speedRateUnit: Flow<Int> = dataStore.data
+        .map { preferences ->
+            normalizeSpeedRateUnit(preferences[KEY_SPEED_RATE_UNIT] ?: 0)
+        }
+
+    suspend fun setSpeedRateUnit(rateUnit: Int) {
+        dataStore.edit { preferences ->
+            preferences[KEY_SPEED_RATE_UNIT] = normalizeSpeedRateUnit(rateUnit)
         }
     }
 

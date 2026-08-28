@@ -17,6 +17,10 @@
 
 ## Added
 
+- Added global byte/bit rate units with decimal SI bit formatting.
+- Added Upload and download, Upload, Download and Total Overlay modes.
+- Added Total, Upload and Download content modes for the status-bar icon and Live Update.
+
 - Added a first-launch setup wizard for display modes and required permissions.
 - Added Russian and completed onboarding translations.
 

@@ -26,6 +26,13 @@
     <string name="settings_sampling_interval">Intervalo de Amostragem</string>
     <string name="settings_sampling_interval_desc">Intervalos menores reduzem a precisão; intervalos maiores são mais precisos, mas atualizam mais lentamente.</string>
     <string name="settings_speed_unit_title">Unidade de Velocidade</string>
+    <string name="settings_speed_rate_unit_title">Unidade de taxa</string>
+    <string name="settings_speed_rate_unit_desc">As unidades em bytes mantêm a escala 1024 existente. As unidades em bits usam o SI decimal (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_speed_rate_unit_bytes">Bytes (B/s)</string>
+    <string name="settings_speed_rate_unit_bits">Bits (b/s)</string>
+    <string name="settings_overlay_display_mode">Conteúdo da sobreposição</string>
+    <string name="settings_display_mode_both">Envio e receção</string>
+    <string name="settings_notification_icon_mode">Ícone da barra de estado</string>
     <string name="settings_speed_unit_desc">Bloqueie a unidade de exibição para valores de velocidade</string>
     <string name="settings_min_speed_unit_title">Unidade de Exibição Mínima</string>
     <string name="settings_min_speed_unit_desc">Força o valor 0 para tráfego reduzido. Ativo apenas no modo Automático.</string>
@@ -49,7 +56,7 @@
     <string name="settings_lock_overlay">Bloquear Janela Flutuante</string>
     <string name="config_lock_overlay_desc">Impedir que a janela seja movida</string>
     <string name="settings_overlay_show_on_status_bar">Mostrar Sobre a Barra De Status</string>
-    <string name="settings_overlay_show_on_status_bar_desc">Permitir que a janela flutuante seja arrastada sobre a barra de status e a área do buraco da câmera</string>
+    <string name="settings_overlay_show_on_status_bar_desc">Coloque a sobreposição flutuante na área da barra de estado. Isto não é um indicador da barra de estado do sistema e pode ser afetado pelo recorte da câmara e pelos ícones do sistema.</string>
     <string name="settings_overlay_position_x">Posição X</string>
     <string name="settings_overlay_position_x_desc">Posição horizontal em px. Valores negativos são permitidos.</string>
     <string name="settings_overlay_position_y">Posição Y</string>
@@ -61,8 +68,8 @@
     <string name="settings_overlay_auto_hide_threshold">Limiar para Ocultar Automaticamente</string>
     <string name="settings_overlay_auto_hide_threshold_desc">Ocultar a janela flutuante após tráfego contínuo abaixo de %1$s</string>
     <string name="settings_overlay_auto_hide_threshold_disabled">Ocultação automática desativada</string>
-    <string name="settings_overlay_auto_hide_threshold_input_title">Limiar Personalizado para Ocultar (KB/s)</string>
-    <string name="settings_overlay_auto_hide_threshold_input_summary">Insira o valor do limiar em KB/s diretamente. Use 0 para desativar.</string>
+    <string name="settings_overlay_auto_hide_threshold_input_title">Limiar de ocultação automática personalizado (%1$s)</string>
+    <string name="settings_overlay_auto_hide_threshold_input_summary">Introduza o valor do limiar em %1$s diretamente. Introduza 0 para desativar.</string>
     <string name="settings_overlay_use_default_colors">Usar Cores Padrão</string>
     <string name="settings_overlay_use_default_colors_desc">As cores se adaptarão ao tema do sistema (Escuro/Claro)</string>
     <string name="settings_overlay_hide_background">Ocultar Fundo</string>
@@ -99,8 +106,8 @@
     <string name="settings_notification_threshold">Limiar para Notificação</string>
     <string name="settings_notification_threshold_desc">Quando a velocidade estiver abaixo do limite (%1$s), mostrar o modo de baixo tráfego</string>
     <string name="settings_notification_threshold_disabled">O modo de baixo tráfego está desativado</string>
-    <string name="settings_notification_threshold_input_title">Limiar Personalizado (KB/s)</string>
-    <string name="settings_notification_threshold_input_summary">Insira o valor do limite em KB/s diretamente</string>
+    <string name="settings_notification_threshold_input_title">Limiar personalizado (%1$s)</string>
+    <string name="settings_notification_threshold_input_summary">Introduza o valor do limiar em %1$s diretamente</string>
     <string name="settings_notification_low_traffic_mode">Ação Quando Abaixo do Limiar</string>
     <string name="settings_notification_low_traffic_mode_static">Mostrar Ícone Estático</string>
     <string name="settings_notification_low_traffic_mode_dynamic">Mostrar Velocidade Dinâmica</string>

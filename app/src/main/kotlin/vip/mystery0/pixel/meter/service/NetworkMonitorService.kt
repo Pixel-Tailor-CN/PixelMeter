@@ -66,6 +66,7 @@ class NetworkMonitorService : Service() {
             textDown = repository.notificationTextDown.value,
             upFirst = repository.notificationOrderUpFirst.value,
             displayMode = repository.notificationDisplayMode.value,
+            iconMode = repository.notificationIconMode.value,
             textSize = repository.notificationTextSize.value,
             unitSize = repository.notificationUnitSize.value,
             threshold = repository.notificationThreshold.value,
@@ -74,6 +75,7 @@ class NetworkMonitorService : Service() {
             color = repository.notificationColor.value,
             speedUnit = repository.speedUnit.value,
             minSpeedUnit = repository.minSpeedUnit.value,
+            rateUnit = repository.speedRateUnit.value,
             postedAtMillis = notificationPostedAtMillis
         )
         lastNotificationFingerprint = initialNotif.fingerprint
@@ -140,6 +142,7 @@ class NetworkMonitorService : Service() {
                     val textDown = repository.notificationTextDown.value
                     val upFirst = repository.notificationOrderUpFirst.value
                     val displayMode = repository.notificationDisplayMode.value
+                    val iconMode = repository.notificationIconMode.value
                     val textSize = repository.notificationTextSize.value
                     val unitSize = repository.notificationUnitSize.value
                     val threshold = repository.notificationThreshold.value
@@ -148,13 +151,27 @@ class NetworkMonitorService : Service() {
                     val color = repository.notificationColor.value
                     val speedUnit = repository.speedUnit.value
                     val minSpeedUnit = repository.minSpeedUnit.value
+                    val rateUnit = repository.speedRateUnit.value
 
                     notificationHelper.buildNotification(
-                        speed, isLiveUpdate, isNotificationEnabled,
-                        textUp, textDown, upFirst, displayMode,
-                        textSize, unitSize, threshold, lowTrafficMode,
-                        useCustomColor, color, speedUnit, minSpeedUnit,
-                        notificationPostedAtMillis
+                        speed = speed,
+                        isLiveUpdate = isLiveUpdate,
+                        isNotificationEnabled = isNotificationEnabled,
+                        textUp = textUp,
+                        textDown = textDown,
+                        upFirst = upFirst,
+                        displayMode = displayMode,
+                        iconMode = iconMode,
+                        textSize = textSize,
+                        unitSize = unitSize,
+                        threshold = threshold,
+                        lowTrafficMode = lowTrafficMode,
+                        useCustomColor = useCustomColor,
+                        color = color,
+                        speedUnit = speedUnit,
+                        minSpeedUnit = minSpeedUnit,
+                        rateUnit = rateUnit,
+                        postedAtMillis = notificationPostedAtMillis
                     )
                 }
                 if (notificationResult.fingerprint != lastNotificationFingerprint) {

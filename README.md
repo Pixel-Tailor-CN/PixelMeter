@@ -38,13 +38,14 @@ No fixed `tun0` blacklist, Root access or Shizuku service is required.
 
 - **Accurate physical-interface statistics**: Excludes VPN transports and reads Wi-Fi, cellular and Ethernet counters directly.
 - **First-launch setup wizard**: Choose notification speed, Android 16+ Live Update and the floating window with only the required permissions.
+- **Global rate units**: Display speeds as bytes/s or decimal SI bits/s across the app.
 - **Notification speed display**:
-  - Real-time Bitmap status bar icon.
+  - Real-time Bitmap status bar icon with Total, Upload or Download content.
   - Total, upload-only and download-only modes.
   - Custom prefixes, display threshold, icon sizing and notification color.
 - **Android 16+ Live Update**: Uses the promoted ongoing status bar presentation when enabled and supported.
 - **Floating window**:
-  - Compose-based draggable Overlay.
+  - Compose-based draggable Overlay with Upload and download, Upload, Download and Total modes.
   - Horizontal or vertical layout, alignment, spacing, text size, padding, colors and corner radius.
   - Position lock and persistence.
   - Optional landscape, immersive-mode and sustained-low-traffic hiding.

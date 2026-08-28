@@ -29,6 +29,8 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
     val textDown by viewModel.notificationTextDown.collectAsState(initial = "\u25BC ")
     val upFirst by viewModel.notificationOrderUpFirst.collectAsState(initial = true)
     val displayMode by viewModel.notificationDisplayMode.collectAsState(initial = 0)
+    val iconMode by viewModel.notificationIconMode.collectAsState(initial = 0)
+    val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
     val textSize by viewModel.notificationTextSize.collectAsState(initial = 0.65f)
     val unitSize by viewModel.notificationUnitSize.collectAsState(initial = 0.35f)
 
@@ -68,13 +70,14 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
             summary = { Text(stringResource(R.string.settings_show_up_first_desc)) }
         )
 
+        val labelBoth = stringResource(R.string.settings_display_mode_both)
         val labelTotal = stringResource(R.string.settings_display_mode_total)
         val labelUpload = stringResource(R.string.settings_display_mode_upload)
         val labelDownload = stringResource(R.string.settings_display_mode_download)
         val displayModeLabel = when (displayMode) {
             1 -> labelUpload
             2 -> labelDownload
-            else -> labelTotal
+            else -> labelBoth
         }
 
         ListPreference(
@@ -89,11 +92,23 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
             },
             title = { Text(stringResource(R.string.settings_notification_display_mode)) },
             values = listOf(
-                labelTotal,
+                labelBoth,
                 labelUpload,
                 labelDownload
             ),
             summary = { Text(displayModeLabel) }
+        )
+
+        val iconModeValues = listOf(labelTotal, labelUpload, labelDownload)
+        val iconModeLabel = iconModeValues.getOrElse(iconMode) { labelTotal }
+        ListPreference(
+            value = iconModeLabel,
+            onValueChange = {
+                viewModel.setNotificationIconMode(iconModeValues.indexOf(it).coerceAtLeast(0))
+            },
+            title = { Text(stringResource(R.string.settings_notification_icon_mode)) },
+            values = iconModeValues,
+            summary = { Text(iconModeLabel) }
         )
 
         SliderPreference(
@@ -133,7 +148,7 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
                 if (threshold == 0L) {
                     Text(stringResource(R.string.settings_notification_threshold_disabled))
                 } else {
-                    val thresholdText = SpeedFormatter.formatSpeedLine(threshold)
+                    val thresholdText = SpeedFormatter.formatSpeedLine(threshold, rateUnit = speedRateUnit)
                     Text(
                         stringResource(
                             R.string.settings_notification_threshold_desc,
@@ -143,20 +158,33 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
                 }
             },
             valueText = {
-                Text(SpeedFormatter.formatSpeedLine(threshold))
+                Text(SpeedFormatter.formatSpeedLine(threshold, rateUnit = speedRateUnit))
             }
         )
 
         TextFieldPreference(
-            value = (threshold / 1024).toString(),
+            value = SpeedFormatter.formatThresholdInputValue(threshold, speedRateUnit),
             onValueChange = {
-                val kb = it.toLongOrNull()
-                if (kb != null && kb >= 0) {
-                    viewModel.setNotificationThreshold(kb * 1024)
-                }
+                SpeedFormatter.parseThresholdInputValue(it, speedRateUnit)?.let(
+                    viewModel::setNotificationThreshold
+                )
             },
-            title = { Text(stringResource(R.string.settings_notification_threshold_input_title)) },
-            summary = { Text(stringResource(R.string.settings_notification_threshold_input_summary)) },
+            title = {
+                Text(
+                    stringResource(
+                        R.string.settings_notification_threshold_input_title,
+                        if (speedRateUnit == 1) "kb/s" else "KB/s"
+                    )
+                )
+            },
+            summary = {
+                Text(
+                    stringResource(
+                        R.string.settings_notification_threshold_input_summary,
+                        if (speedRateUnit == 1) "kb/s" else "KB/s"
+                    )
+                )
+            },
             textToValue = { it },
         )
 

@@ -86,6 +86,9 @@ class NetworkRepository(
     private val _overlayDirection = MutableStateFlow(0)
     val overlayDirection: StateFlow<Int> = _overlayDirection.asStateFlow()
 
+    private val _overlayDisplayMode = MutableStateFlow(0)
+    val overlayDisplayMode: StateFlow<Int> = _overlayDisplayMode.asStateFlow()
+
     private val _overlayAlignment = MutableStateFlow(0)
     val overlayAlignment: StateFlow<Int> = _overlayAlignment.asStateFlow()
 
@@ -113,6 +116,9 @@ class NetworkRepository(
 
     private val _notificationDisplayMode = MutableStateFlow(0)
     val notificationDisplayMode: StateFlow<Int> = _notificationDisplayMode.asStateFlow()
+
+    private val _notificationIconMode = MutableStateFlow(0)
+    val notificationIconMode: StateFlow<Int> = _notificationIconMode.asStateFlow()
 
     private val _notificationTextSize = MutableStateFlow(0.65f)
     val notificationTextSize: StateFlow<Float> = _notificationTextSize.asStateFlow()
@@ -143,6 +149,9 @@ class NetworkRepository(
 
     private val _speedUnit = MutableStateFlow(0)
     val speedUnit: StateFlow<Int> = _speedUnit.asStateFlow()
+
+    private val _speedRateUnit = MutableStateFlow(0)
+    val speedRateUnit: StateFlow<Int> = _speedRateUnit.asStateFlow()
 
     private val _minSpeedUnit = MutableStateFlow(0)
     val minSpeedUnit: StateFlow<Int> = _minSpeedUnit.asStateFlow()
@@ -197,6 +206,9 @@ class NetworkRepository(
                 _overlayY.value = prefs[DataStoreRepository.KEY_OVERLAY_Y] ?: 200
                 _overlayDirection.value =
                     prefs[DataStoreRepository.KEY_OVERLAY_DIRECTION] ?: 0
+                _overlayDisplayMode.value = DataStoreRepository.normalizeOverlayDisplayMode(
+                    prefs[DataStoreRepository.KEY_OVERLAY_DISPLAY_MODE] ?: 0
+                )
                 _overlayAlignment.value =
                     prefs[DataStoreRepository.KEY_OVERLAY_ALIGNMENT] ?: 0
                 _overlayMeterSpacing.value =
@@ -215,6 +227,9 @@ class NetworkRepository(
                     prefs[DataStoreRepository.KEY_NOTIFICATION_ORDER_UP_FIRST] ?: true
                 _notificationDisplayMode.value =
                     prefs[DataStoreRepository.KEY_NOTIFICATION_DISPLAY_MODE] ?: 0
+                _notificationIconMode.value = DataStoreRepository.normalizeNotificationIconMode(
+                    prefs[DataStoreRepository.KEY_NOTIFICATION_ICON_MODE] ?: 0
+                )
                 _notificationTextSize.value =
                     prefs[DataStoreRepository.KEY_NOTIFICATION_TEXT_SIZE] ?: 0.65f
                 _notificationUnitSize.value =
@@ -232,6 +247,9 @@ class NetworkRepository(
                     prefs[DataStoreRepository.KEY_NOTIFICATION_USE_CUSTOM_COLOR] ?: false
                 _notificationColor.value = prefs[DataStoreRepository.KEY_NOTIFICATION_COLOR] ?: 0
                 _speedUnit.value = prefs[DataStoreRepository.KEY_SPEED_UNIT] ?: 0
+                _speedRateUnit.value = DataStoreRepository.normalizeSpeedRateUnit(
+                    prefs[DataStoreRepository.KEY_SPEED_RATE_UNIT] ?: 0
+                )
                 _minSpeedUnit.value = prefs[DataStoreRepository.KEY_MIN_SPEED_UNIT] ?: 0
                 _appThemeMode.value =
                     prefs[DataStoreRepository.KEY_APP_THEME_MODE] ?: AppThemeMode.Dynamic.value
@@ -304,6 +322,9 @@ class NetworkRepository(
             dataStoreRepository.overlayDirection.collect { _overlayDirection.value = it }
         }
         scope.launch {
+            dataStoreRepository.overlayDisplayMode.collect { _overlayDisplayMode.value = it }
+        }
+        scope.launch {
             dataStoreRepository.overlayAlignment.collect { _overlayAlignment.value = it }
         }
         scope.launch {
@@ -336,6 +357,11 @@ class NetworkRepository(
         scope.launch {
             dataStoreRepository.notificationDisplayMode.collect {
                 _notificationDisplayMode.value = it
+            }
+        }
+        scope.launch {
+            dataStoreRepository.notificationIconMode.collect {
+                _notificationIconMode.value = it
             }
         }
         scope.launch {
@@ -386,6 +412,11 @@ class NetworkRepository(
         scope.launch {
             dataStoreRepository.speedUnit.collect {
                 _speedUnit.value = it
+            }
+        }
+        scope.launch {
+            dataStoreRepository.speedRateUnit.collect {
+                _speedRateUnit.value = it
             }
         }
         scope.launch {
@@ -495,6 +526,10 @@ class NetworkRepository(
         scope.launch { dataStoreRepository.setOverlayDirection(direction) }
     }
 
+    fun setOverlayDisplayMode(mode: Int) {
+        scope.launch { dataStoreRepository.setOverlayDisplayMode(mode) }
+    }
+
     fun setOverlayAlignment(alignment: Int) {
         scope.launch { dataStoreRepository.setOverlayAlignment(alignment) }
     }
@@ -531,6 +566,10 @@ class NetworkRepository(
 
     fun setNotificationDisplayMode(mode: Int) {
         scope.launch { dataStoreRepository.setNotificationDisplayMode(mode) }
+    }
+
+    fun setNotificationIconMode(mode: Int) {
+        scope.launch { dataStoreRepository.setNotificationIconMode(mode) }
     }
 
     fun setNotificationTextSize(size: Float) {
@@ -571,6 +610,10 @@ class NetworkRepository(
 
     fun setSpeedUnit(unit: Int) {
         scope.launch { dataStoreRepository.setSpeedUnit(unit) }
+    }
+
+    fun setSpeedRateUnit(rateUnit: Int) {
+        scope.launch { dataStoreRepository.setSpeedRateUnit(rateUnit) }
     }
 
     fun setMinSpeedUnit(unit: Int) {

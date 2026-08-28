@@ -25,7 +25,8 @@ When a new user skips Onboarding, write `key_onboarding_shown=true`. If DataStor
 | `key_auto_start_service` | Boolean | false | Start monitoring after boot |
 | `key_hide_from_recents` | Boolean | false | Hide the app from Recents |
 | `key_sampling_interval` | Long | 1500 | Sampling interval in milliseconds |
-| `key_speed_unit` | Int | 0 | 0 Auto; 1 B/s; 2 KB/s; 3 MB/s; 4 GB/s |
+| `key_speed_rate_unit` | Int | 0 | 0 Bytes (binary 1024 scale); 1 Bits (decimal SI scale) |
+| `key_speed_unit` | Int | 0 | Scale index: 0 Auto; 1 base; 2 kilo; 3 mega; 4 giga, interpreted through `key_speed_rate_unit` |
 | `key_min_speed_unit` | Int | 0 | Minimum Auto unit: 0 None; 1 KB/s; 2 MB/s; 3 GB/s |
 
 ### App Theme
@@ -45,7 +46,8 @@ When a new user skips Onboarding, write `key_onboarding_shown=true`. If DataStor
 | `key_notification_text_up` | String | `▲ ` | Upload prefix |
 | `key_notification_text_down` | String | `▼ ` | Download prefix |
 | `key_notification_order_up_first` | Boolean | true | Show upload first |
-| `key_notification_display_mode` | Int | 0 | 0 Total; 1 Upload; 2 Download |
+| `key_notification_display_mode` | Int | 0 | Drawer content: 0 Upload and download; 1 Upload; 2 Download |
+| `key_notification_icon_mode` | Int | 0 | Status-bar Bitmap / Live Update content: 0 Total; 1 Upload; 2 Download |
 | `key_notification_text_size` | Float | 0.65 | Bitmap value text-size ratio |
 | `key_notification_unit_size` | Float | 0.35 | Bitmap unit text-size ratio |
 | `key_notification_threshold` | Long | 0 | Low-traffic threshold in bytes per second; 0 disables it |
@@ -72,6 +74,7 @@ When a new user skips Onboarding, write `key_onboarding_shown=true`. If DataStor
 | `key_overlay_order_up_first` | Boolean | true | Show upload first |
 | `key_overlay_hide_background` | Boolean | false | Use a fully transparent background |
 | `key_overlay_use_default_colors` | Boolean | false | Use themed Surface colors |
+| `key_overlay_display_mode` | Int | 0 | 0 Upload and download; 1 Upload; 2 Download; 3 Total |
 | `key_overlay_direction` | Int | 0 | 0 horizontal; 1 vertical |
 | `key_overlay_alignment` | Int | 0 | 0 Start; 1 Center; 2 End |
 | `key_overlay_meter_spacing` | Int | 8 | Horizontal upload/download spacing in dp |
@@ -81,9 +84,9 @@ When a new user skips Onboarding, write `key_onboarding_shown=true`. If DataStor
 
 ## 4. Persistence and Application
 
-- Theme and most UI settings apply immediately through StateFlow.
+- Theme, Rate unit, and Overlay settings apply immediately through StateFlow.
 - Overlay coordinates are saved when dragging ends.
-- While the Service is running, notifications and the Overlay consume current Repository settings.
+- While the Service is running, notification Rate unit and icon-content changes apply on the next network sample; Overlay changes recompose immediately.
 - Completing Onboarding writes notification, Live Update, Overlay, and completion state in one operation.
 - Auto-start only affects `BootReceiver`; changing it does not immediately start the Service.
 

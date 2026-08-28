@@ -42,8 +42,10 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
     )
     val overlayAutoHideThreshold by viewModel.overlayAutoHideThreshold.collectAsState(initial = 0L)
     val direction by viewModel.overlayDirection.collectAsState(initial = 0)
+    val displayMode by viewModel.overlayDisplayMode.collectAsState(initial = 0)
     val alignment by viewModel.overlayAlignment.collectAsState(initial = 0)
     val meterSpacing by viewModel.overlayMeterSpacing.collectAsState(initial = 8)
+    val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
     val platformLocale = LocalLocale.current.platformLocale
 
     PreferenceCategory(title = { Text(stringResource(R.string.settings_category_overlay)) })
@@ -67,6 +69,21 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             onValueChange = { viewModel.setOverlayLocked(it) },
             title = { Text(stringResource(R.string.settings_lock_overlay)) },
             summary = { Text(stringResource(R.string.config_lock_overlay_desc)) }
+        )
+        val labelBoth = stringResource(R.string.settings_display_mode_both)
+        val labelUpload = stringResource(R.string.settings_display_mode_upload)
+        val labelDownload = stringResource(R.string.settings_display_mode_download)
+        val labelTotal = stringResource(R.string.settings_display_mode_total)
+        val displayModeValues = listOf(labelBoth, labelUpload, labelDownload, labelTotal)
+        val displayModeLabel = displayModeValues.getOrElse(displayMode) { labelBoth }
+        ListPreference(
+            value = displayModeLabel,
+            onValueChange = {
+                viewModel.setOverlayDisplayMode(displayModeValues.indexOf(it).coerceAtLeast(0))
+            },
+            title = { Text(stringResource(R.string.settings_overlay_display_mode)) },
+            values = displayModeValues,
+            summary = { Text(displayModeLabel) }
         )
         SwitchPreference(
             value = isOverlayShowOnStatusBar,
@@ -126,7 +143,7 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
                 if (overlayAutoHideThreshold == 0L) {
                     Text(stringResource(R.string.settings_overlay_auto_hide_threshold_disabled))
                 } else {
-                    val thresholdText = SpeedFormatter.formatSpeedLine(overlayAutoHideThreshold)
+                    val thresholdText = SpeedFormatter.formatSpeedLine(overlayAutoHideThreshold, rateUnit = speedRateUnit)
                     Text(
                         stringResource(
                             R.string.settings_overlay_auto_hide_threshold_desc,
@@ -136,20 +153,34 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
                 }
             },
             valueText = {
-                Text(SpeedFormatter.formatSpeedLine(overlayAutoHideThreshold))
+                Text(SpeedFormatter.formatSpeedLine(overlayAutoHideThreshold, rateUnit = speedRateUnit))
             }
         )
         TextFieldPreference(
-            value = (overlayAutoHideThreshold / 1024).toString(),
+            value = SpeedFormatter.formatThresholdInputValue(
+                overlayAutoHideThreshold,
+                speedRateUnit
+            ),
             onValueChange = {
-                val kb = it.toLongOrNull()
-                if (kb != null && kb >= 0) {
-                    viewModel.setOverlayAutoHideThreshold(kb * 1024)
-                }
+                SpeedFormatter.parseThresholdInputValue(it, speedRateUnit)?.let(
+                    viewModel::setOverlayAutoHideThreshold
+                )
             },
-            title = { Text(stringResource(R.string.settings_overlay_auto_hide_threshold_input_title)) },
+            title = {
+                Text(
+                    stringResource(
+                        R.string.settings_overlay_auto_hide_threshold_input_title,
+                        if (speedRateUnit == 1) "kb/s" else "KB/s"
+                    )
+                )
+            },
             summary = {
-                Text(stringResource(R.string.settings_overlay_auto_hide_threshold_input_summary))
+                Text(
+                    stringResource(
+                        R.string.settings_overlay_auto_hide_threshold_input_summary,
+                        if (speedRateUnit == 1) "kb/s" else "KB/s"
+                    )
+                )
             },
             textToValue = { it },
         )
@@ -210,6 +241,7 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             value = textUp,
             onValueChange = { viewModel.setOverlayTextUp(it) },
             textToValue = { it },
+            enabled = displayMode == 0 || displayMode == 1,
             title = { Text(stringResource(R.string.settings_text_prefix_up)) },
             summary = { Text(stringResource(R.string.settings_text_prefix_up_desc, textUp)) },
         )
@@ -217,12 +249,14 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             value = textDown,
             onValueChange = { viewModel.setOverlayTextDown(it) },
             textToValue = { it },
+            enabled = displayMode == 0 || displayMode == 2,
             title = { Text(stringResource(R.string.settings_text_prefix_down)) },
             summary = { Text(stringResource(R.string.settings_text_prefix_down_desc, textDown)) },
         )
         SwitchPreference(
             value = upFirst,
             onValueChange = { viewModel.setOverlayOrderUpFirst(it) },
+            enabled = displayMode == 0,
             title = { Text(stringResource(R.string.settings_show_up_first)) },
             summary = { Text(stringResource(R.string.settings_show_up_first_desc)) }
         )
@@ -245,7 +279,8 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             },
             title = { Text(stringResource(R.string.settings_overlay_direction)) },
             values = listOf(labelHorizontal, labelVertical),
-            summary = { Text(directionLabel) }
+            summary = { Text(directionLabel) },
+            enabled = displayMode == 0
         )
 
         SliderPreference(
@@ -258,7 +293,7 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             title = { Text(stringResource(R.string.settings_overlay_meter_spacing)) },
             summary = { Text(stringResource(R.string.settings_overlay_meter_spacing_desc)) },
             valueText = { Text("${meterSpacing}dp") },
-            enabled = direction == 0
+            enabled = displayMode == 0 && direction == 0
         )
 
         val labelAlignStart = stringResource(R.string.settings_overlay_alignment_start)
@@ -283,7 +318,7 @@ fun OverlaySettingsSection(viewModel: SettingsViewModel) {
             title = { Text(stringResource(R.string.settings_overlay_alignment)) },
             values = listOf(labelAlignStart, labelAlignCenter, labelAlignEnd),
             summary = { Text(alignmentLabel) },
-            enabled = direction == 1
+            enabled = displayMode == 0 && direction == 1
         )
     }
 }

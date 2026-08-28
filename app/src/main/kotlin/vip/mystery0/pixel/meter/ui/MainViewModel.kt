@@ -36,6 +36,7 @@ class MainViewModel(
     val isHideFromRecents = repository.isHideFromRecents
 
     val speedUnit = repository.speedUnit
+    val speedRateUnit = repository.speedRateUnit
     val minSpeedUnit = repository.minSpeedUnit
     val appThemeMode = repository.appThemeMode
     val appThemeColor = repository.appThemeColor

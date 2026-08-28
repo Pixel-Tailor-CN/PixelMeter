@@ -26,6 +26,13 @@
     <string name="settings_sampling_interval">Интервал измерения</string>
     <string name="settings_sampling_interval_desc">Меньший интервал снижает точность, а больший повышает её, но замедляет обновление.</string>
     <string name="settings_speed_unit_title">Единица скорости</string>
+    <string name="settings_speed_rate_unit_title">Единица скорости</string>
+    <string name="settings_speed_rate_unit_desc">Для байтов сохраняется существующая шкала 1024. Для битов используется десятичная SI (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_speed_rate_unit_bytes">Байты (B/s)</string>
+    <string name="settings_speed_rate_unit_bits">Биты (b/s)</string>
+    <string name="settings_overlay_display_mode">Содержимое оверлея</string>
+    <string name="settings_display_mode_both">Отправка и загрузка</string>
+    <string name="settings_notification_icon_mode">Значок в строке состояния</string>
     <string name="settings_speed_unit_desc">Фиксировать единицу отображения скорости</string>
     <string name="settings_min_speed_unit_title">Минимальная единица отображения</string>
     <string name="settings_min_speed_unit_desc">Показывать 0 при небольшом трафике. Работает только в автоматическом режиме.</string>
@@ -49,7 +56,7 @@
     <string name="settings_lock_overlay">Закрепить плавающее окно</string>
     <string name="config_lock_overlay_desc">Запретить перемещение окна</string>
     <string name="settings_overlay_show_on_status_bar">Показывать поверх строки состояния</string>
-    <string name="settings_overlay_show_on_status_bar_desc">Разрешить перемещение плавающего окна поверх строки состояния и области выреза</string>
+    <string name="settings_overlay_show_on_status_bar_desc">Разместите плавающий оверлей в области строки состояния. Это не системный индикатор строки состояния и на него могут влиять вырез камеры и системные значки.</string>
     <string name="settings_overlay_position_x">Положение по X</string>
     <string name="settings_overlay_position_x_desc">Горизонтальное положение в пикселях. Допускаются отрицательные значения.</string>
     <string name="settings_overlay_position_y">Положение по Y</string>
@@ -61,8 +68,8 @@
     <string name="settings_overlay_auto_hide_threshold">Порог автоскрытия</string>
     <string name="settings_overlay_auto_hide_threshold_desc">Скрывать плавающее окно при длительном трафике ниже %1$s</string>
     <string name="settings_overlay_auto_hide_threshold_disabled">Автоскрытие отключено</string>
-    <string name="settings_overlay_auto_hide_threshold_input_title">Свой порог автоскрытия (КБ/с)</string>
-    <string name="settings_overlay_auto_hide_threshold_input_summary">Введите порог в КБ/с. Введите 0, чтобы отключить функцию.</string>
+    <string name="settings_overlay_auto_hide_threshold_input_title">Пользовательский порог автоскрытия (%1$s)</string>
+    <string name="settings_overlay_auto_hide_threshold_input_summary">Введите пороговое значение в %1$s напрямую. Введите 0, чтобы отключить.</string>
     <string name="settings_overlay_use_default_colors">Использовать цвета по умолчанию</string>
     <string name="settings_overlay_use_default_colors_desc">Цвета будут адаптироваться к системной теме (тёмной/светлой)</string>
     <string name="settings_overlay_hide_background">Скрыть фон</string>
@@ -99,8 +106,8 @@
     <string name="settings_notification_threshold">Порог уведомления</string>
     <string name="settings_notification_threshold_desc">Если скорость ниже порога (%1$s), использовать режим низкого трафика</string>
     <string name="settings_notification_threshold_disabled">Режим низкого трафика отключён</string>
-    <string name="settings_notification_threshold_input_title">Свой порог (КБ/с)</string>
-    <string name="settings_notification_threshold_input_summary">Введите порог в КБ/с</string>
+    <string name="settings_notification_threshold_input_title">Пользовательский порог (%1$s)</string>
+    <string name="settings_notification_threshold_input_summary">Введите пороговое значение в %1$s напрямую</string>
     <string name="settings_notification_low_traffic_mode">Действие ниже порога</string>
     <string name="settings_notification_low_traffic_mode_static">Показывать статичный значок</string>
     <string name="settings_notification_low_traffic_mode_dynamic">Показывать динамическую скорость</string>

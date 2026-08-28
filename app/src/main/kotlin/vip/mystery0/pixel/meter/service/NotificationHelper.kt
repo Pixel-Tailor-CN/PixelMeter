@@ -62,6 +62,8 @@ class NotificationHelper(private val context: Context) {
         val statusText: String? = null,
         val valueText: String? = null,
         val unitText: String? = null,
+        val rateUnit: Int = 0,
+        val iconMode: Int = 0,
         val useCustomColor: Boolean = false,
         val color: Int = 0
     ) {
@@ -74,6 +76,8 @@ class NotificationHelper(private val context: Context) {
             statusText.orEmpty(),
             valueText.orEmpty(),
             unitText.orEmpty(),
+            rateUnit.toString(),
+            iconMode.toString(),
             useCustomColor.toString(),
             if (useCustomColor) color.toString() else ""
         ).joinToString(separator = "|")
@@ -111,6 +115,7 @@ class NotificationHelper(private val context: Context) {
         textDown: String,
         upFirst: Boolean,
         displayMode: Int,
+        iconMode: Int,
         textSize: Float = 0.65f,
         unitSize: Float = 0.35f,
         threshold: Long = 0L,
@@ -119,6 +124,7 @@ class NotificationHelper(private val context: Context) {
         color: Int = 0,
         speedUnit: Int = 0,
         minSpeedUnit: Int = 0,
+        rateUnit: Int = 0,
         postedAtMillis: Long
     ): NotificationBuildResult {
         val renderState = createRenderState(
@@ -129,12 +135,14 @@ class NotificationHelper(private val context: Context) {
             textDown = textDown,
             upFirst = upFirst,
             displayMode = displayMode,
+            iconMode = iconMode,
             threshold = threshold,
             lowTrafficMode = lowTrafficMode,
             useCustomColor = useCustomColor,
             color = color,
             speedUnit = speedUnit,
-            minSpeedUnit = minSpeedUnit
+            minSpeedUnit = minSpeedUnit,
+            rateUnit = rateUnit
         )
         return NotificationBuildResult(
             notification = buildNotificationFromState(
@@ -155,29 +163,41 @@ class NotificationHelper(private val context: Context) {
         textDown: String,
         upFirst: Boolean,
         displayMode: Int,
+        iconMode: Int,
         threshold: Long,
         lowTrafficMode: Int,
         useCustomColor: Boolean,
         color: Int,
         speedUnit: Int,
-        minSpeedUnit: Int
+        minSpeedUnit: Int,
+        rateUnit: Int
     ): NotificationRenderState {
         var shouldLiveUpdate = isLiveUpdate
+        val normalizedIconMode = if (iconMode in 0..2) iconMode else 0
+        val iconSpeed = when (normalizedIconMode) {
+            1 -> speed.uploadSpeed
+            2 -> speed.downloadSpeed
+            else -> speed.totalSpeed
+        }
 
         if (!isNotificationEnabled) {
             return NotificationRenderState(
                 mode = "disabled-static",
                 contentText = context.getString(R.string.notification_content_text),
+                rateUnit = rateUnit,
+                iconMode = normalizedIconMode,
                 useCustomColor = useCustomColor,
                 color = color
             )
         }
 
-        if (speed.totalSpeed < threshold) {
+        if (iconSpeed < threshold) {
             if (lowTrafficMode == 0) {
                 return NotificationRenderState(
                     mode = "threshold-static",
                     contentText = context.getString(R.string.notification_content_text_monitoring),
+                    rateUnit = rateUnit,
+                    iconMode = normalizedIconMode,
                     useCustomColor = useCustomColor,
                     color = color
                 )
@@ -189,14 +209,16 @@ class NotificationHelper(private val context: Context) {
             SpeedFormatter.formatSpeedLine(
                 speed.uploadSpeed,
                 speedUnit,
-                minSpeedUnit
+                minSpeedUnit,
+                rateUnit
             )
         }"
         val downText = "$textDown${
             SpeedFormatter.formatSpeedLine(
                 speed.downloadSpeed,
                 speedUnit,
-                minSpeedUnit
+                minSpeedUnit,
+                rateUnit
             )
         }"
         val contentText = when (displayMode) {
@@ -210,25 +232,27 @@ class NotificationHelper(private val context: Context) {
                 mode = "live-update",
                 contentText = contentText,
                 statusText = SpeedFormatter.formatSpeedTextForLiveUpdate(
-                    speed.totalSpeed,
-                    speedUnit,
-                    minSpeedUnit
+                    iconSpeed,
+                    rateUnit
                 ),
+                rateUnit = rateUnit,
+                iconMode = normalizedIconMode,
                 useCustomColor = useCustomColor,
                 color = color
             )
         }
 
         val (valueStr, unitStr) = SpeedFormatter.formatSpeedText(
-            speed.totalSpeed,
-            speedUnit,
-            minSpeedUnit
+            iconSpeed,
+            rateUnit = rateUnit
         )
         return NotificationRenderState(
             mode = "bitmap",
             contentText = contentText,
             valueText = valueStr,
             unitText = unitStr,
+            rateUnit = rateUnit,
+            iconMode = normalizedIconMode,
             useCustomColor = useCustomColor,
             color = color
         )
@@ -285,6 +309,15 @@ class NotificationHelper(private val context: Context) {
 
                 textPaint.textSize = size * textSize
                 unitPaint.textSize = size * unitSize
+                val maxTextWidth = size * 0.92f
+                val valueWidth = textPaint.measureText(valueText)
+                if (valueWidth > maxTextWidth) {
+                    textPaint.textSize *= maxTextWidth / valueWidth
+                }
+                val unitWidth = unitPaint.measureText(unitText)
+                if (unitWidth > maxTextWidth) {
+                    unitPaint.textSize *= maxTextWidth / unitWidth
+                }
 
                 canvas.drawText(valueText, cx, cyValue, textPaint)
                 canvas.drawText(unitText, cx, cyUnit, unitPaint)

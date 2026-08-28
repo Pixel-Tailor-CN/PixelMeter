@@ -29,6 +29,13 @@
     <string name="settings_sampling_interval">Sampling Interval</string>
     <string name="settings_sampling_interval_desc">Lower intervals reduce accuracy; higher intervals are more accurate but update slowly.</string>
     <string name="settings_speed_unit_title">Speed Unit</string>
+    <string name="settings_speed_rate_unit_title">Rate unit</string>
+    <string name="settings_speed_rate_unit_desc">Byte units keep the existing 1024 scale. Bit units use decimal SI (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_speed_rate_unit_bytes">Bytes (B/s)</string>
+    <string name="settings_speed_rate_unit_bits">Bits (b/s)</string>
+    <string name="settings_overlay_display_mode">Overlay display content</string>
+    <string name="settings_display_mode_both">Upload and download</string>
+    <string name="settings_notification_icon_mode">Status bar icon</string>
     <string name="settings_speed_unit_desc">Lock the display unit for speed values</string>
     <string name="settings_min_speed_unit_title">Minimum Display Unit</string>
     <string name="settings_min_speed_unit_desc">Force 0 value for small traffic. Only active in Auto mode.</string>
@@ -52,7 +59,7 @@
     <string name="settings_lock_overlay">Lock Floating Window</string>
     <string name="config_lock_overlay_desc">Prevent window from being moved</string>
     <string name="settings_overlay_show_on_status_bar">Show Over Status Bar</string>
-    <string name="settings_overlay_show_on_status_bar_desc">Allow the floating window to be dragged over the status bar and notch area</string>
+    <string name="settings_overlay_show_on_status_bar_desc">Place the floating overlay in the status bar area. This is not a system status-bar indicator and may be affected by the camera cutout and system icons.</string>
     <string name="settings_overlay_position_x">X Position</string>
     <string name="settings_overlay_position_x_desc">Horizontal position in px. Negative values are allowed.</string>
     <string name="settings_overlay_position_y">Y Position</string>
@@ -64,8 +71,8 @@
     <string name="settings_overlay_auto_hide_threshold">Auto-hide Threshold</string>
     <string name="settings_overlay_auto_hide_threshold_desc">Hide the floating window after sustained traffic below %1$s</string>
     <string name="settings_overlay_auto_hide_threshold_disabled">Auto-hide is disabled</string>
-    <string name="settings_overlay_auto_hide_threshold_input_title">Custom Auto-hide Threshold (KB/s)</string>
-    <string name="settings_overlay_auto_hide_threshold_input_summary">Input the threshold value in KB/s directly. Enter 0 to disable.</string>
+    <string name="settings_overlay_auto_hide_threshold_input_title">Custom Auto-hide Threshold (%1$s)</string>
+    <string name="settings_overlay_auto_hide_threshold_input_summary">Input the threshold value in %1$s directly. Enter 0 to disable.</string>
     <string name="settings_overlay_use_default_colors">Use Default Colors</string>
     <string name="settings_overlay_use_default_colors_desc">Colors will adapt to system theme (Dark/Light)</string>
     <string name="settings_overlay_hide_background">Hide Background</string>
@@ -102,8 +109,8 @@
     <string name="settings_notification_threshold">Notification Threshold</string>
     <string name="settings_notification_threshold_desc">When speed is below threshold (%1$s), show low traffic mode</string>
     <string name="settings_notification_threshold_disabled">Low traffic mode is disabled</string>
-    <string name="settings_notification_threshold_input_title">Custom Threshold (KB/s)</string>
-    <string name="settings_notification_threshold_input_summary">Input the threshold value in KB/s directly</string>
+    <string name="settings_notification_threshold_input_title">Custom Threshold (%1$s)</string>
+    <string name="settings_notification_threshold_input_summary">Input the threshold value in %1$s directly</string>
     <string name="settings_notification_low_traffic_mode">Action Below Threshold</string>
     <string name="settings_notification_low_traffic_mode_static">Show Static Icon</string>
     <string name="settings_notification_low_traffic_mode_dynamic">Show Dynamic Speed</string>

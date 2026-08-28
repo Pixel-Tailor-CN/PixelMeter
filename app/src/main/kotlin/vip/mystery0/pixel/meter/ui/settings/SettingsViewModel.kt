@@ -42,6 +42,7 @@ class SettingsViewModel(
     val overlayX = repository.overlayX
     val overlayY = repository.overlayY
     val overlayDirection = repository.overlayDirection
+    val overlayDisplayMode = repository.overlayDisplayMode
     val overlayAlignment = repository.overlayAlignment
     val overlayMeterSpacing = repository.overlayMeterSpacing
     val isOverlayLocked = repository.isOverlayLocked
@@ -57,6 +58,7 @@ class SettingsViewModel(
     val notificationTextDown = repository.notificationTextDown
     val notificationOrderUpFirst = repository.notificationOrderUpFirst
     val notificationDisplayMode = repository.notificationDisplayMode
+    val notificationIconMode = repository.notificationIconMode
     val notificationTextSize = repository.notificationTextSize
     val notificationUnitSize = repository.notificationUnitSize
     val notificationThreshold = repository.notificationThreshold
@@ -67,6 +69,7 @@ class SettingsViewModel(
     // General Settings
     val samplingInterval = repository.samplingInterval
     val speedUnit = repository.speedUnit
+    val speedRateUnit = repository.speedRateUnit
     val minSpeedUnit = repository.minSpeedUnit
     val appThemeMode = repository.appThemeMode
     val appThemeColor = repository.appThemeColor
@@ -133,6 +136,7 @@ class SettingsViewModel(
 
     fun setOverlayPosition(x: Int, y: Int) = repository.saveOverlayPosition(x, y)
     fun setOverlayDirection(direction: Int) = repository.setOverlayDirection(direction)
+    fun setOverlayDisplayMode(mode: Int) = repository.setOverlayDisplayMode(mode)
     fun setOverlayAlignment(alignment: Int) = repository.setOverlayAlignment(alignment)
     fun setOverlayMeterSpacing(spacing: Int) = repository.setOverlayMeterSpacing(spacing)
 
@@ -144,6 +148,7 @@ class SettingsViewModel(
         repository.setNotificationOrderUpFirst(upFirst)
 
     fun setNotificationDisplayMode(mode: Int) = repository.setNotificationDisplayMode(mode)
+    fun setNotificationIconMode(mode: Int) = repository.setNotificationIconMode(mode)
     fun setNotificationTextSize(size: Float) = repository.setNotificationTextSize(size)
     fun setNotificationUnitSize(size: Float) = repository.setNotificationUnitSize(size)
     fun setOverlayUseDefaultColors(useDefault: Boolean) =
@@ -159,6 +164,7 @@ class SettingsViewModel(
         repository.setAutoStartServiceEnabled(enabled)
 
     fun setSpeedUnit(unit: Int) = repository.setSpeedUnit(unit)
+    fun setSpeedRateUnit(rateUnit: Int) = repository.setSpeedRateUnit(rateUnit)
     fun setMinSpeedUnit(unit: Int) = repository.setMinSpeedUnit(unit)
     fun setAppThemeMode(mode: Int) = repository.setAppThemeMode(mode)
     fun setAppThemeColor(color: Int) = repository.setAppThemeColor(color)

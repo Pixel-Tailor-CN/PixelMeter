@@ -14,13 +14,15 @@ Showing initializes lifecycle and saved state. Hiding removes the View, dispatch
 
 ## 3. Content
 
-The Overlay displays upload and download speeds formatted by `SpeedFormatter`. It supports custom prefixes and order, horizontal or vertical layout, Start/Center/End alignment for vertical values, horizontal spacing, text size, padding, corner radius, custom colors, themed colors, and a transparent background.
+The Overlay formats speed through `SpeedFormatter` and supports four content modes: Upload and download, Upload only, Download only, and Total. Single-direction modes retain their matching configured prefix; Total has no direction prefix. Two-meter order, direction, spacing, and alignment controls remain visible but are disabled when the selected content mode does not use them.
+
+The global Rate unit selects Bytes (existing binary scale) or Bits (decimal SI scale).
 
 ## 4. Dragging and Position
 
 When unlocked, `detectDragGestures` updates WindowManager X/Y coordinates. Drag completion writes the coordinates to DataStore for the next display session.
 
-Coordinates use px and may be negative. The status-bar option changes the valid drag area and must be validated on devices with display cutouts.
+Coordinates use px and may be negative. The status-bar option places the floating `TYPE_APPLICATION_OVERLAY` in that area; it is not native SystemUI integration. It requires the Display over other apps permission and must be validated around cutouts, privacy indicators, and system icons.
 
 ## 5. Conditional Hiding
 
@@ -36,7 +38,7 @@ The root `ComposeView` remains attached so it can continue receiving Insets and 
 
 ### Sustained Low Traffic
 
-The Overlay hides after total speed remains below `key_overlay_auto_hide_threshold` for three sampling cycles and reappears when speed recovers. A threshold of zero disables this behavior.
+The Overlay hides after the displayed speed remains below `key_overlay_auto_hide_threshold` for three sampling cycles and reappears when speed recovers. Upload-only and Download-only modes evaluate their respective direction; Upload-and-download and Total evaluate total speed. A threshold of zero disables this behavior.
 
 ## 6. Theme and Colors
 

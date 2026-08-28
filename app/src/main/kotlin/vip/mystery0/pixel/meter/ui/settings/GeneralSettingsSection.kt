@@ -25,6 +25,7 @@ fun GeneralSettingsSection(viewModel: SettingsViewModel) {
     val context = LocalContext.current
     val interval by viewModel.samplingInterval.collectAsState(initial = 1500L)
     val speedUnit by viewModel.speedUnit.collectAsState(initial = 0)
+    val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
     val minSpeedUnit by viewModel.minSpeedUnit.collectAsState(initial = 0)
     val appThemeMode by viewModel.appThemeMode.collectAsState(
         initial = AppThemeMode.Dynamic.value
@@ -52,51 +53,39 @@ fun GeneralSettingsSection(viewModel: SettingsViewModel) {
         valueText = { Text("${interval}ms") }
     )
 
+    val rateBytes = stringResource(R.string.settings_speed_rate_unit_bytes)
+    val rateBits = stringResource(R.string.settings_speed_rate_unit_bits)
+    val rateUnitLabel = if (speedRateUnit == 1) rateBits else rateBytes
+    ListPreference(
+        value = rateUnitLabel,
+        onValueChange = { viewModel.setSpeedRateUnit(if (it == rateBits) 1 else 0) },
+        title = { Text(stringResource(R.string.settings_speed_rate_unit_title)) },
+        values = listOf(rateBytes, rateBits),
+        summary = { Text(stringResource(R.string.settings_speed_rate_unit_desc)) }
+    )
+
     val labelAuto = stringResource(R.string.settings_speed_unit_auto)
-    val speedUnitValues = listOf(labelAuto, "B/s", "KB/s", "MB/s", "GB/s")
-    val speedUnitLabel = when (speedUnit) {
-        1 -> "B/s"
-        2 -> "KB/s"
-        3 -> "MB/s"
-        4 -> "GB/s"
-        else -> labelAuto
+    val unitLabels = if (speedRateUnit == 1) {
+        listOf("b/s", "kb/s", "Mb/s", "Gb/s")
+    } else {
+        listOf("B/s", "KB/s", "MB/s", "GB/s")
     }
+    val speedUnitValues = listOf(labelAuto) + unitLabels
+    val speedUnitLabel = speedUnitValues.getOrElse(speedUnit) { labelAuto }
     ListPreference(
         value = speedUnitLabel,
-        onValueChange = {
-            val unit = when (it) {
-                "B/s" -> 1
-                "KB/s" -> 2
-                "MB/s" -> 3
-                "GB/s" -> 4
-                else -> 0
-            }
-            viewModel.setSpeedUnit(unit)
-        },
+        onValueChange = { viewModel.setSpeedUnit(speedUnitValues.indexOf(it).coerceAtLeast(0)) },
         title = { Text(stringResource(R.string.settings_speed_unit_title)) },
         values = speedUnitValues,
         summary = { Text(stringResource(R.string.settings_speed_unit_desc)) }
     )
 
     val labelNone = stringResource(R.string.settings_min_speed_unit_none)
-    val minSpeedUnitValues = listOf(labelNone, "KB/s", "MB/s", "GB/s")
-    val minSpeedUnitLabel = when (minSpeedUnit) {
-        1 -> "KB/s"
-        2 -> "MB/s"
-        3 -> "GB/s"
-        else -> labelNone
-    }
+    val minSpeedUnitValues = listOf(labelNone) + unitLabels.drop(1)
+    val minSpeedUnitLabel = minSpeedUnitValues.getOrElse(minSpeedUnit) { labelNone }
     ListPreference(
         value = minSpeedUnitLabel,
-        onValueChange = {
-            val unit = when (it) {
-                "KB/s" -> 1
-                "MB/s" -> 2
-                "GB/s" -> 3
-                else -> 0
-            }
-            viewModel.setMinSpeedUnit(unit)
-        },
+        onValueChange = { viewModel.setMinSpeedUnit(minSpeedUnitValues.indexOf(it).coerceAtLeast(0)) },
         title = { Text(stringResource(R.string.settings_min_speed_unit_title)) },
         values = minSpeedUnitValues,
         summary = { Text(stringResource(R.string.settings_min_speed_unit_desc)) },
