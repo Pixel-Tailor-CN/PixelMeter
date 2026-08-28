@@ -124,11 +124,9 @@
     <string name="settings_telegram_channel">Канал Telegram</string>
     <string name="settings_telegram_channel_desc">Следите за каналом Telegram, чтобы получать обновления</string>
     <string name="color_picker_title">Выбор цвета</string>
-
     <string name="content_description_settings">Настройки</string>
     <string name="content_description_back">Назад</string>
     <string name="notification_channel_description">Показывает скорость сети в реальном времени в строке состояния</string>
-
     <string name="onboarding_title">Настройка Pixel Meter</string>
     <string name="onboarding_step">Шаг %1$d из %2$d</string>
     <string name="onboarding_skip">Пропустить</string>
@@ -161,7 +159,6 @@
     <string name="onboarding_finish_later">Предоставить позже</string>
     <string name="settings_run_onboarding_title">Повторно запустить мастер настройки</string>
     <string name="settings_run_onboarding_desc">Проверить способы отображения и необходимые разрешения</string>
-
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="error_notification_permission">Требуется разрешение на уведомления</string>
     <string name="error_overlay_permission">Для плавающего окна требуется разрешение на отображение поверх других приложений</string>
