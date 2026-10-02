@@ -16,6 +16,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.data.repository.NetworkRepository
+import vip.mystery0.pixel.meter.permissions.DisplayPermissionState
 import vip.mystery0.pixel.meter.service.NetworkMonitorService
 
 class MainViewModel(
@@ -74,20 +75,22 @@ class MainViewModel(
     fun startService() {
         _serviceStartError.value = null
 
-        // 1. Check notification permission (runtime grant is required only on Android 13+).
-        if (!hasNotificationPermission()) {
+        val permissions = DisplayPermissionState(
+            notificationEnabled = isNotificationEnabled.value,
+            overlayEnabled = isOverlayEnabled.value,
+            notificationGranted = hasNotificationPermission(),
+            overlayGranted = Settings.canDrawOverlays(application)
+        )
+        if (permissions.missingOverlayPermission) {
+            _serviceStartError.value =
+                application.getString(R.string.error_overlay_permission) to Settings.ACTION_MANAGE_OVERLAY_PERMISSION
+            return
+        }
+        // POST_NOTIFICATIONS controls notification display, not Foreground Service eligibility.
+        if (!permissions.canStartMonitoring) {
             _serviceStartError.value =
                 application.getString(R.string.error_notification_permission) to Settings.ACTION_APP_NOTIFICATION_SETTINGS
             return
-        }
-
-        // 2. Check Overlay Permission if enabled
-        if (isOverlayEnabled.value) {
-            if (!Settings.canDrawOverlays(application)) {
-                _serviceStartError.value =
-                    application.getString(R.string.error_overlay_permission) to Settings.ACTION_MANAGE_OVERLAY_PERMISSION
-                return
-            }
         }
 
         val intent = Intent(application, NetworkMonitorService::class.java)
@@ -132,7 +135,7 @@ class MainViewModel(
             if (!hasNotificationPermission()) {
                 _serviceStartError.value =
                     application.getString(R.string.error_notification_permission) to Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                stopService(false)
+                // Keep monitoring and the Overlay alive while the user resolves this display permission.
             }
         }
         repository.setNotificationEnabled(enable)

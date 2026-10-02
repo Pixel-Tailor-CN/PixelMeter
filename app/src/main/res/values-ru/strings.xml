@@ -152,12 +152,12 @@
     <string name="onboarding_live_update_desc">Использовать индикатор Live Update в строке состояния на Android 16 и новее.</string>
     <string name="onboarding_live_update_unavailable">Недоступно в этой версии Android. Требуется Android 16 или новее.</string>
     <string name="onboarding_overlay_desc">Показывать перемещаемый индикатор скорости поверх других приложений.</string>
-    <string name="onboarding_foreground_notification_note">Во время мониторинга Android требует показывать уведомление службы переднего плана. Если динамическое отображение скорости отключено, минимальное служебное уведомление останется видимым.</string>
+    <string name="onboarding_foreground_notification_note">Мониторинг использует службу переднего плана, которой необходимо передать служебное уведомление. На Android 13 и новее плавающее окно может работать без разрешения на уведомления: Android скрывает уведомление из панели, но может показывать приложение в списке активных приложений.</string>
     <string name="onboarding_back">Назад</string>
     <string name="onboarding_next">Далее</string>
     <string name="onboarding_permission_title">Предоставьте необходимые разрешения</string>
     <string name="onboarding_permission_desc">Pixel Meter запрашивает только разрешения, необходимые для выбранных способов отображения.</string>
-    <string name="onboarding_notification_permission_desc">Необходимо для мониторинга и показа уведомления службы переднего плана.</string>
+    <string name="onboarding_notification_permission_desc">Необходимо для отображения скорости в уведомлениях и Live Update. Плавающее окно может работать без этого разрешения.</string>
     <string name="onboarding_overlay_permission_desc">Необходимо для отображения плавающего индикатора скорости поверх других приложений.</string>
     <string name="onboarding_permission_optional_note">Предоставьте разрешения, необходимые для выбранных функций, или сделайте это позже. Настройки будут сохранены, но мониторинг не запустится автоматически.</string>
     <string name="onboarding_grant_permission">Предоставить разрешение</string>
@@ -167,7 +167,7 @@
     <string name="settings_run_onboarding_title">Повторно запустить мастер настройки</string>
     <string name="settings_run_onboarding_desc">Проверить способы отображения и необходимые разрешения</string>
     <string name="error_unknown">Неизвестная ошибка</string>
-    <string name="error_notification_permission">Требуется разрешение на уведомления</string>
+    <string name="error_notification_permission">Предоставьте разрешение на уведомления, чтобы показывать в них скорость сети.</string>
     <string name="error_overlay_permission">Для плавающего окна требуется разрешение на отображение поверх других приложений</string>
     <string name="error_service_start_failed">Не удалось запустить службу: %1$s</string>
     <string name="notification_channel_name">Служба мониторинга сети</string>
@@ -178,4 +178,5 @@
     <string name="tile_notification_label">Уведомление</string>
     <string name="tile_desc_active">Активно</string>
     <string name="tile_desc_inactive">Неактивно</string>
+    <string name="notification_permission_overlay_note">Уведомления запрещены. Плавающее окно может работать при наличии разрешения на показ поверх других приложений.</string>
 </resources>

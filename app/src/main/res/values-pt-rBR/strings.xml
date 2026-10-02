@@ -136,12 +136,12 @@
     <string name="onboarding_live_update_desc">Usa o indicador Live Update do Android 16 ou posterior.</string>
     <string name="onboarding_live_update_unavailable">Indisponível nesta versão do Android. Requer Android 16 ou posterior.</string>
     <string name="onboarding_overlay_desc">Mostra um medidor móvel de velocidade sobre outros aplicativos.</string>
-    <string name="onboarding_foreground_notification_note">O Android exige uma notificação de serviço em primeiro plano durante o monitoramento. Se a velocidade dinâmica for desativada, uma notificação mínima continuará visível.</string>
+    <string name="onboarding_foreground_notification_note">O monitoramento usa um serviço em primeiro plano e precisa fornecer uma notificação de serviço. No Android 13 ou superior, você pode usar a janela flutuante sem permissão de notificações; o Android oculta a notificação no painel, mas ainda pode mostrar o app em Apps ativos.</string>
     <string name="onboarding_back">Voltar</string>
     <string name="onboarding_next">Avançar</string>
     <string name="onboarding_permission_title">Conceda as permissões necessárias</string>
     <string name="onboarding_permission_desc">O Pixel Meter solicita apenas as permissões exigidas pelos métodos de exibição selecionados.</string>
-    <string name="onboarding_notification_permission_desc">Necessária para executar o monitoramento e mostrar a notificação do serviço em primeiro plano.</string>
+    <string name="onboarding_notification_permission_desc">Necessária para a velocidade nas notificações e Live Update. A janela flutuante pode funcionar sem esta permissão.</string>
     <string name="onboarding_overlay_permission_desc">Necessária para mostrar o medidor flutuante sobre outros aplicativos.</string>
     <string name="onboarding_permission_optional_note">Conceda as permissões exigidas pelos recursos selecionados ou escolha concedê-las mais tarde. Suas escolhas serão salvas, mas o monitoramento não será iniciado automaticamente.</string>
     <string name="onboarding_grant_permission">Conceder permissão</string>
@@ -152,7 +152,7 @@
     <string name="settings_run_onboarding_desc">Revise os métodos de exibição e as permissões necessárias</string>
     <string name="color_picker_title">Selecionar Cor</string>
     <string name="error_unknown">Erro desconhecido</string>
-    <string name="error_notification_permission">Permissão de notificação necessária</string>
+    <string name="error_notification_permission">Conceda permissão de notificações para mostrar a velocidade da rede nas notificações.</string>
     <string name="error_overlay_permission">Permissão de Sobreposição Necessária para a Janela Flutuante</string>
     <string name="error_service_start_failed">Falha ao iniciar o serviço: %1$s</string>
     <string name="notification_channel_name">Serviço de Monitoramento da Rede</string>
@@ -178,4 +178,5 @@
     <string name="settings_overlay_hide_background">Ocultar Plano de Fundo</string>
     <string name="settings_overlay_hide_background_desc">Torne o plano de fundo da janela flutuante totalmente transparente</string>
     <string name="settings_overlay_padding">Preenchimento do Fundo</string>
+    <string name="notification_permission_overlay_note">As notificações não são permitidas. A janela flutuante ainda pode funcionar com permissão para aparecer sobre outros apps.</string>
 </resources>

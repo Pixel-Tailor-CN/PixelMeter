@@ -122,6 +122,7 @@ class MainActivity : ComponentActivity() {
             contract = ActivityResultContracts.RequestPermission()
         ) { granted ->
             notificationPermissionGranted = granted
+            if (granted) viewModel.clearError()
         }
         val overlayPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
@@ -179,7 +180,12 @@ class MainActivity : ComponentActivity() {
                 }
             )
         } else {
-            HomeScreen()
+            HomeScreen(
+                notificationPermissionGranted = notificationPermissionGranted,
+                onRequestNotificationPermission = {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            )
         }
     }
 
@@ -192,7 +198,10 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun HomeScreen() {
+    fun HomeScreen(
+        notificationPermissionGranted: Boolean,
+        onRequestNotificationPermission: () -> Unit
+    ) {
         val context = LocalContext.current
         val speed by viewModel.currentSpeed.collectAsState()
         val isServiceRunning by viewModel.isServiceRunning.collectAsState()
@@ -212,18 +221,6 @@ class MainActivity : ComponentActivity() {
                 tasks[0].setExcludeFromRecents(isHideFromRecents)
             }
         }
-
-        // Permission Launcher
-        val notificationPermissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted ->
-                if (isGranted) {
-                    viewModel.clearError()
-                }
-            }
-        )
-
-
 
         Scaffold(
             topBar = {
@@ -284,7 +281,7 @@ class MainActivity : ComponentActivity() {
                                         serviceError?.let { (_, action) ->
                                             if (action == Settings.ACTION_APP_NOTIFICATION_SETTINGS) {
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                                    onRequestNotificationPermission()
                                                 } else {
                                                     val intent = Intent(action)
                                                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -394,7 +391,13 @@ class MainActivity : ComponentActivity() {
                 item {
                     ConfigRow(
                         title = stringResource(R.string.config_enable_notification),
-                        subtitle = stringResource(R.string.config_enable_notification_desc),
+                        subtitle = stringResource(
+                            if (isNotificationEnabled && !notificationPermissionGranted) {
+                                R.string.notification_permission_overlay_note
+                            } else {
+                                R.string.config_enable_notification_desc
+                            }
+                        ),
                         checked = isNotificationEnabled,
                         onCheckedChange = { viewModel.setNotificationEnabled(it) }
                     )

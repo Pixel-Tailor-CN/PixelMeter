@@ -152,12 +152,12 @@
     <string name="onboarding_live_update_desc">使用 Android 16+ 的 Live Update 状态栏胶囊。</string>
     <string name="onboarding_live_update_unavailable">当前 Android 版本不可用，需要 Android 16 或更高版本。</string>
     <string name="onboarding_overlay_desc">在其他应用上方显示可移动的网速悬浮窗。</string>
-    <string name="onboarding_foreground_notification_note">Android 要求监听期间显示前台服务通知。即使关闭通知动态网速，仍会保留最简服务通知。</string>
+    <string name="onboarding_foreground_notification_note">监听使用前台服务，必须向 Android 提供服务通知。在 Android 13 及以上版本，可以不授予通知权限而使用悬浮窗；Android 会隐藏通知栏中的通知，但仍可能在“活动应用”中显示本应用。</string>
     <string name="onboarding_back">上一步</string>
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_permission_title">授予必要权限</string>
     <string name="onboarding_permission_desc">Pixel Meter 只会申请所选显示方式需要的权限。</string>
-    <string name="onboarding_notification_permission_desc">用于运行监听服务并显示前台服务通知。</string>
+    <string name="onboarding_notification_permission_desc">用于通知栏网速和 Live Update。悬浮窗无需此权限也可运行。</string>
     <string name="onboarding_overlay_permission_desc">用于在其他应用上方绘制网速悬浮窗。</string>
     <string name="onboarding_permission_optional_note">请授予所选功能需要的权限，或选择稍后授权。稍后授权会保存配置，但不会自动启动监听服务。</string>
     <string name="onboarding_grant_permission">授予权限</string>
@@ -167,7 +167,7 @@
     <string name="settings_run_onboarding_title">重新运行设置向导</string>
     <string name="settings_run_onboarding_desc">重新选择显示方式并检查必要权限</string>
     <string name="error_unknown">未知错误</string>
-    <string name="error_notification_permission">启用通知需要授予“通知权限”</string>
+    <string name="error_notification_permission">在通知栏显示网速需要授予“通知权限”。</string>
     <string name="error_overlay_permission">启用悬浮窗需要“显示在其他应用上层”的权限</string>
     <string name="error_service_start_failed">启动服务失败: %1$s</string>
     <string name="notification_channel_name">网速显示服务</string>
@@ -178,4 +178,5 @@
     <string name="tile_notification_label">通知栏显示</string>
     <string name="tile_desc_active">已开启</string>
     <string name="tile_desc_inactive">已关闭</string>
+    <string name="notification_permission_overlay_note">未授予通知权限。授予“显示在其他应用上层”权限后，悬浮窗仍可运行。</string>
 </resources>

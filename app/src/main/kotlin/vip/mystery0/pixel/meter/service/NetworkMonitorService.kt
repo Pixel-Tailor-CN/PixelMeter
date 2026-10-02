@@ -1,16 +1,19 @@
 package vip.mystery0.pixel.meter.service
 
+import android.Manifest
 import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -81,6 +84,7 @@ class NetworkMonitorService : Service() {
         lastNotificationFingerprint = initialNotif.fingerprint
 
         try {
+            // This notification is mandatory even when POST_NOTIFICATIONS is denied.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 startForeground(
                     NotificationHelper.NOTIFICATION_ID,
@@ -134,6 +138,19 @@ class NetworkMonitorService : Service() {
                     }
                 }
 
+                // Notification denial must not interrupt the Overlay or sampling. The required
+                // initial Foreground Service notification above is still always supplied.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ContextCompat.checkSelfPermission(
+                        this@NetworkMonitorService,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Repost on the next permitted sample even if the visible content is unchanged.
+                    lastNotificationFingerprint = null
+                    return@collect
+                }
+
                 // Notification logic
                 val notificationResult = withContext(Dispatchers.Default) {
                     val isLiveUpdate = repository.isLiveUpdateEnabled.value
@@ -175,11 +192,17 @@ class NetworkMonitorService : Service() {
                     )
                 }
                 if (notificationResult.fingerprint != lastNotificationFingerprint) {
-                    lastNotificationFingerprint = notificationResult.fingerprint
-                    notificationManager.notify(
-                        NotificationHelper.NOTIFICATION_ID,
-                        notificationResult.notification
-                    )
+                    try {
+                        notificationManager.notify(
+                            NotificationHelper.NOTIFICATION_ID,
+                            notificationResult.notification
+                        )
+                        lastNotificationFingerprint = notificationResult.fingerprint
+                    } catch (e: SecurityException) {
+                        // Permission can change between the check and posting the notification.
+                        lastNotificationFingerprint = null
+                        Log.w(TAG, "Notification permission changed; keeping monitoring active", e)
+                    }
                 }
             }
         }

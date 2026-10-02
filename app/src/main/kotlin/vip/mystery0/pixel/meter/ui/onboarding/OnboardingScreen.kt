@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import vip.mystery0.pixel.meter.R
+import vip.mystery0.pixel.meter.permissions.DisplayPermissionState
 
 @Composable
 fun OnboardingScreen(
@@ -106,8 +107,8 @@ fun OnboardingScreen(
                 )
 
                 else -> PermissionStep(
-                    notificationRequired = notificationEnabled || overlayEnabled,
-                    overlayRequired = overlayEnabled,
+                    notificationEnabled = notificationEnabled,
+                    overlayEnabled = overlayEnabled,
                     notificationPermissionGranted = notificationPermissionGranted,
                     overlayPermissionGranted = overlayPermissionGranted,
                     onRequestNotificationPermission = onRequestNotificationPermission,
@@ -303,8 +304,8 @@ private fun OnboardingSwitchRow(
 
 @Composable
 private fun PermissionStep(
-    notificationRequired: Boolean,
-    overlayRequired: Boolean,
+    notificationEnabled: Boolean,
+    overlayEnabled: Boolean,
     notificationPermissionGranted: Boolean,
     overlayPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit,
@@ -313,9 +314,13 @@ private fun PermissionStep(
     onFinish: () -> Unit,
     onFinishLater: () -> Unit
 ) {
-    val requiredPermissionsGranted =
-        (!notificationRequired || notificationPermissionGranted) &&
-            (!overlayRequired || overlayPermissionGranted)
+    val permissions = DisplayPermissionState(
+        notificationEnabled = notificationEnabled,
+        overlayEnabled = overlayEnabled,
+        notificationGranted = notificationPermissionGranted,
+        overlayGranted = overlayPermissionGranted
+    )
+    val requiredPermissionsGranted = permissions.canStartMonitoring
     Text(
         text = stringResource(R.string.onboarding_permission_title),
         style = MaterialTheme.typography.headlineSmall
@@ -324,7 +329,7 @@ private fun PermissionStep(
         text = stringResource(R.string.onboarding_permission_desc),
         style = MaterialTheme.typography.bodyMedium
     )
-    if (notificationRequired) {
+    if (notificationEnabled) {
         PermissionCard(
             title = stringResource(R.string.settings_permission_notification),
             description = stringResource(R.string.onboarding_notification_permission_desc),
@@ -332,12 +337,19 @@ private fun PermissionStep(
             onRequest = onRequestNotificationPermission
         )
     }
-    if (overlayRequired) {
+    if (overlayEnabled) {
         PermissionCard(
             title = stringResource(R.string.settings_permission_overlay),
             description = stringResource(R.string.onboarding_overlay_permission_desc),
             granted = overlayPermissionGranted,
             onRequest = onRequestOverlayPermission
+        )
+    }
+    if (permissions.missingNotificationPermission && overlayEnabled) {
+        Text(
+            text = stringResource(R.string.notification_permission_overlay_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
     if (!requiredPermissionsGranted) {
@@ -364,7 +376,7 @@ private fun PermissionStep(
         ) {
             Text(
                 stringResource(
-                    if (notificationRequired) {
+                    if (permissions.hasSelectedDisplay) {
                         R.string.onboarding_finish_and_start
                     } else {
                         R.string.onboarding_finish

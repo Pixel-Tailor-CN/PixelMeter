@@ -158,12 +158,12 @@
     <string name="onboarding_live_update_desc">Use the Android 16+ Live Update status bar chip.</string>
     <string name="onboarding_live_update_unavailable">Unavailable on this Android version. Requires Android 16 or later.</string>
     <string name="onboarding_overlay_desc">Show a movable speed meter over other apps.</string>
-    <string name="onboarding_foreground_notification_note">Android requires a foreground-service notification while monitoring. If dynamic notification speed is disabled, a minimal service notification remains visible.</string>
+    <string name="onboarding_foreground_notification_note">Monitoring uses a foreground service and must provide a service notification. On Android 13+, you can use the floating window without notification permission; Android hides the notification from the drawer but may still show the app in Active apps.</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_permission_title">Grant required permissions</string>
     <string name="onboarding_permission_desc">Pixel Meter only requests permissions required by the display methods you selected.</string>
-    <string name="onboarding_notification_permission_desc">Required to run monitoring and display the foreground-service notification.</string>
+    <string name="onboarding_notification_permission_desc">Required for notification speed and Live Update. The floating window can run without this permission.</string>
     <string name="onboarding_overlay_permission_desc">Required to draw the floating speed meter over other apps.</string>
     <string name="onboarding_permission_optional_note">Grant the permissions required by your selected features, or choose to grant them later. Your choices will be saved, but monitoring will not start automatically.</string>
     <string name="onboarding_grant_permission">Grant permission</string>
@@ -174,7 +174,7 @@
     <string name="settings_run_onboarding_desc">Review display methods and required permissions</string>
 
     <string name="error_unknown">Unknown error</string>
-    <string name="error_notification_permission">Notification permission required</string>
+    <string name="error_notification_permission">Grant notification permission to display network speed in notifications.</string>
     <string name="error_overlay_permission">Overlay permission required for Floating Window</string>
     <string name="error_service_start_failed">Failed to start service: %1$s</string>
 
@@ -187,4 +187,5 @@
     <string name="tile_notification_label">Notification</string>
     <string name="tile_desc_active">Active</string>
     <string name="tile_desc_inactive">Inactive</string>
+    <string name="notification_permission_overlay_note">Notifications are not permitted. The floating window can still run with permission to display over other apps.</string>
 </resources>

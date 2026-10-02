@@ -1,0 +1,109 @@
+name: Overlay permission smoke
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: overlay-permission-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-33:
+    name: Android 13 UI permission regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      ANDROID_SERIAL: emulator-5554
+      # Only debug signing is used. The existing signing script requires a path.
+      SIGN_KEY_STORE_FILE: /tmp/unused-release-signing.jks
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Java 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Record source and runner
+        run: |
+          mkdir -p artifacts
+          {
+            git rev-parse HEAD
+            git rev-parse HEAD^{tree}
+            uname -a
+            java -version
+            df -h .
+          } > artifacts/source-and-runner.txt 2>&1
+
+      - name: Add preinstalled Android SDK tools to PATH
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          test -x "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/emulator" >> "$GITHUB_PATH"
+
+      - name: Install official Android SDK packages
+        timeout-minutes: 10
+        run: |
+          set -o pipefail
+          sdkmanager 'platform-tools' 'emulator' 'platforms;android-37.0' 'build-tools;36.0.0' 'system-images;android-33;google_apis;x86_64' 2>&1 | tee artifacts/sdk-install.log
+
+      - name: Build, unit tests, and lint
+        timeout-minutes: 18
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --console=plain :app:testDebugUnitTest :app:assembleDebug lint 2>&1 | tee artifacts/gradle.log
+          sha256sum app/build/outputs/apk/debug/*.apk > artifacts/apk-sha256.txt
+          unzip -l app/build/outputs/apk/debug/app-debug.apk > artifacts/apk-contents.txt
+
+      - name: Validate smoke-harness parsers
+        run: python3 .github/scripts/overlay_permission_smoke.py --self-test
+
+      - name: Boot hardware-accelerated emulator
+        timeout-minutes: 7
+        run: bash .github/scripts/start_ci_emulator.sh
+
+      - name: Exercise actual UI and permission lifecycle
+        timeout-minutes: 15
+        run: |
+          set -o pipefail
+          python3 .github/scripts/overlay_permission_smoke.py \
+            --apk app/build/outputs/apk/debug/app-debug.apk \
+            --output-dir artifacts/permission-smoke 2>&1 | tee artifacts/permission-smoke.log
+
+      - name: Collect final emulator diagnostics
+        if: always()
+        timeout-minutes: 2
+        run: |
+          mkdir -p artifacts
+          timeout 15 adb devices -l > artifacts/adb-devices.txt 2>&1 || true
+          timeout 20 adb shell getprop > artifacts/device-properties.txt 2>&1 || true
+          timeout 20 adb logcat -d -v threadtime > artifacts/logcat-final.txt 2>&1 || true
+          timeout 15 adb emu kill || true
+
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: overlay-permission-api33-${{ github.run_id }}
+          path: |
+            artifacts/
+            app/build/test-results/testDebugUnitTest/
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/lint-results*
+          if-no-files-found: error
+          retention-days: 14
