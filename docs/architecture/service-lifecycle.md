@@ -83,3 +83,14 @@ On a real Pixel, validate Android 12/12L, Android 13+, and Android 15+ / the cur
 8. Enable auto-start with Overlay permission granted and notifications denied, reboot, and verify the existing boot path on supported devices. Background startup denial must be caught; Overlay permission alone must not be treated as a new API 35+ background-start exemption.
 
 These device checks remain required before claiming runtime validation; successful compilation, Lint, and JVM tests are not a substitute.
+
+
+### Automated Android 13 Smoke Check
+
+The `Overlay permission smoke` workflow checks out the exact PR head and runs debug assembly, JVM tests, Lint, and a hardware-accelerated API 33 x86_64 emulator on a standard GitHub-hosted Ubuntu runner. It uses no release signing secrets and has read-only repository permissions. Third-party actions are pinned to full commit SHAs.
+
+The ADB harness in `.github/scripts/overlay_permission_smoke.py` navigates Onboarding and the main Activity using their actual accessible UI. ADB changes only the disposable emulator's system permissions; it never starts `NetworkMonitorService` directly or writes application preferences. It verifies the active Foreground Service and the visible application Overlay above the launcher, and saves per-case screenshots, UI hierarchies, window/service/permission dumps, Logcat, JSON results, and JUnit results as a 14-day workflow artifact. A missing assertion or failed case fails the job.
+
+The check includes notification denial, both display selections, repeated display toggles, stop/start and force-stop/relaunch, grant/revoke/regrant, and blocked starts when selected output permissions are missing. Runtime notification revocation can kill the app process on Android; the test expects that OS transition and then verifies a foreground UI restart with the Overlay still authorized.
+
+This is an emulator regression check, not a substitute for real Pixel validation. Boot startup, screen-off sleep/resume, Quick Settings Tiles, Live Update on Android 16+, newer target-SDK behavior, and OEM variations remain outside this smoke suite.
