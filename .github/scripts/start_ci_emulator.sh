@@ -3,6 +3,8 @@ set -euo pipefail
 
 mkdir -p artifacts
 export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$PATH"
+export ANDROID_AVD_HOME="${RUNNER_TEMP:-/tmp}/pixelmeter-avd"
+mkdir -p "$ANDROID_AVD_HOME"
 # This ACL applies only to this disposable runner's KVM device and current user.
 test -c /dev/kvm
 if [[ ! -r /dev/kvm || ! -w /dev/kvm ]]; then
@@ -11,9 +13,10 @@ fi
 emulator -accel-check 2>&1 | tee artifacts/emulator-acceleration.txt
 grep -qi 'KVM.*usable' artifacts/emulator-acceleration.txt
 printf 'no\n' | avdmanager create avd --force --name pixelmeter-ci \
-  --package 'system-images;android-33;google_apis;x86_64' --device 'pixel_5'
+  --package 'system-images;android-33;google_apis;x86_64' --device 'pixel_5' \
+  --path "$ANDROID_AVD_HOME/pixelmeter-ci.avd"
 # A tall, English UI avoids truncating onboarding permission cards.
-echo 'hw.keyboard=yes' >> "$HOME/.android/avd/pixelmeter-ci.avd/config.ini"
+echo 'hw.keyboard=yes' >> "$ANDROID_AVD_HOME/pixelmeter-ci.avd/config.ini"
 nohup emulator -avd pixelmeter-ci -port 5554 -no-window -no-audio \
   -no-boot-anim -no-snapshot -wipe-data -accel on -gpu swiftshader \
   -cores 2 -memory 3072 -camera-back none -camera-front none \
