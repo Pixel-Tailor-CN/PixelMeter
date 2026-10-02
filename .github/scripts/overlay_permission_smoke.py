@@ -108,6 +108,30 @@ def visible_overlays(window_dump: str, package: str, screen: tuple[int, int]) ->
     return matches
 
 
+def launcher_active(activity_dump: str, launcher: str) -> bool:
+    # API 33's `dumpsys window windows` contains window records but no focus
+    # summary. ActivityTaskManager includes both resumed activity and focus.
+    resumed = re.findall(r"(?m)^\s*topResumedActivity=ActivityRecord\{[^\n]*?\bu\d+ ([\w.]+)/",
+                         activity_dump)
+    focused = re.findall(r"(?m)^\s*mCurrentFocus=Window\{[^\n]*?\bu\d+ ([\w.]+)/",
+                         activity_dump)
+    if resumed:
+        return set(resumed) == {launcher} and (not focused or set(focused) == {launcher})
+    return bool(focused) and set(focused) == {launcher}
+
+
+def bounded_command_log(entry: dict, limit: int = 4096) -> dict:
+    """Keep full command return values for assertions, but bound repeated logs."""
+    logged = dict(entry)
+    for key in ("stdout", "stderr"):
+        value = logged.get(key)
+        if isinstance(value, str):
+            logged[key + "_chars"] = len(value)
+            logged[key + "_truncated"] = len(value) > limit
+            logged[key] = value[:limit]
+    return logged
+
+
 @dataclass
 class UiTree:
     root: ET.Element
@@ -214,7 +238,7 @@ class Harness:
         finally:
             entry["duration_seconds"] = round(time.monotonic() - start, 3)
             with (self.case_dir / "commands.jsonl").open("a", encoding="utf-8") as file:
-                file.write(json.dumps(entry) + "\n")
+                file.write(json.dumps(bounded_command_log(entry)) + "\n")
 
     def shell(self, *args: str, **kwargs) -> str:
         return self.command("shell", *args, **kwargs)
@@ -379,10 +403,8 @@ class Harness:
 
     def home(self, foreground: bool = True, overlay: bool = True) -> None:
         self.shell("input", "keyevent", "KEYCODE_HOME")
-        self.wait("launcher focus", lambda: any(
-            self.launcher + "/" in line for line in
-            self.shell("dumpsys", "window", "windows").splitlines()
-            if "mCurrentFocus=" in line))
+        self.wait("launcher resumed/focused", lambda: launcher_active(
+            self.shell("dumpsys", "activity", "activities"), self.launcher))
         self.assert_runtime(foreground, overlay)
         self.checkpoint("launcher")
 
@@ -538,6 +560,9 @@ def grant_revoke_restart(h: Harness) -> None:
     h.find("Monitor is Running")
     h.home()
     require(not notification_granted(h.package_dump()), "Notification permission unexpectedly restored")
+    h.notification_permission(True)
+    h.home()
+    h.note("Notification regrant verified after OS-kill recovery; monitoring and overlay remain active")
 
 
 def overlay_denied(h: Harness, notification: bool) -> None:
@@ -683,6 +708,38 @@ def run(args: argparse.Namespace) -> int:
 
 
 class ParserTests(unittest.TestCase):
+    def test_api33_launcher_summary_is_in_activity_dump(self):
+        launcher = "com.google.android.apps.nexuslauncher"
+        # Representative lines from a real API 33 Pixel 5 CI capture. A retained
+        # STOPPED Pixel Meter task below the launcher must not confuse the check.
+        dump = (
+            "ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)\n"
+            "Display #0 (activities from top to bottom):\n"
+            "  * Task{6b8fcc8 #1 type=home U=0 visible=true}\n"
+            "      topResumedActivity=ActivityRecord{cfd1e23 u0 " + launcher + "/.NexusLauncherActivity} t8}\n"
+            "  * Task{6fe5e30 #9 type=standard A=10174:" + PACKAGE + " U=0 visible=false}\n"
+            "    mLastPausedActivity: ActivityRecord{377ffcf u0 " + PACKAGE + "/.MainActivity} t9}\n"
+            "      state=STOPPED stopped=true\n"
+            "ActivityTaskSupervisor state:\n"
+            "  mCurrentFocus=Window{5d143b0 u0 " + launcher + "/" + launcher + ".NexusLauncherActivity}\n"
+        )
+        self.assertTrue(launcher_active(dump, launcher))
+        self.assertFalse(launcher_active(dump, PACKAGE))
+        self.assertFalse(launcher_active(dump.replace("topResumedActivity=", "mLastPausedActivity="), PACKAGE))
+        self.assertFalse(launcher_active(dump.replace("mCurrentFocus=Window{5d143b0 u0 " + launcher,
+                                                     "mCurrentFocus=Window{5d143b0 u0 com.android.settings"), launcher))
+        self.assertFalse(launcher_active("mLastPausedActivity: ActivityRecord{abc u0 " + launcher
+                                         + "/.NexusLauncherActivity}", launcher))
+
+    def test_command_log_truncation_preserves_complete_return_value(self):
+        entry = {"stdout": "a" * 12000, "stderr": "", "returncode": 0}
+        logged = bounded_command_log(entry)
+        self.assertEqual(len(entry["stdout"]), 12000)
+        self.assertEqual(len(logged["stdout"]), 4096)
+        self.assertEqual(logged["stdout_chars"], 12000)
+        self.assertTrue(logged["stdout_truncated"])
+        self.assertFalse(logged["stderr_truncated"])
+
     def test_running_service_is_not_a_pending_restart(self):
         dump = ("ACTIVITY MANAGER SERVICES\n\n  * ServiceRecord{abc u0 " + PACKAGE
                 + "/.service.NetworkMonitorService}\n    isForeground=true foregroundId=1001\n"
