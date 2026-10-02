@@ -18,6 +18,7 @@ browser = "1.10.0"
 datastore = "1.2.1"
 preference = "2.2.0"
 colorpicker = "1.2.0"
+junit = "4.13.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,8 +37,8 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 zhanghai-preference = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "preference" }
 skydoves-colorpicker = { group = "com.github.skydoves", name = "colorpicker-compose", version.ref = "colorpicker" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-

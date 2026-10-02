@@ -30,9 +30,9 @@ Disabling notification speed also disables Live Update. Live Update cannot be ch
 
 ### Step 3: Permissions and Completion
 
-Selecting notification speed or Overlay requires notification permission because monitoring uses a Foreground Service. Overlay additionally requires permission to draw over other apps.
+Overlay requires permission to draw over other apps, independently of notification permission. Only selected notification speed / Live Update shows the notification permission card. With an authorized Overlay, "Finish and start" stays available when notification permission is denied, including when both display methods are selected; explanatory text says notifications will not be shown. Notification-only configuration still requires notification permission on Android 13+.
 
-- All required permissions granted: show "Finish and start".
+- Display startup requirements satisfied: show "Finish and start" (including Overlay-only).
 - No display method selected: show "Finish" and do not start the Service.
 - Permissions incomplete: disable the primary action and offer "Grant later"; save selections without starting automatically.
 

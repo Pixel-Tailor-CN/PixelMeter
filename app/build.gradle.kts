@@ -133,6 +133,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.zhanghai.preference)
     implementation(libs.skydoves.colorpicker)
+    testImplementation(libs.junit)
 }
 
 apply(from = rootProject.file("signing.gradle"))

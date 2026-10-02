@@ -2,7 +2,7 @@
 
 ## 1. Basic Foreground Service Notification
 
-Android requires an ongoing notification while the monitoring Service runs. When dynamic speed is disabled, `NotificationHelper` publishes a minimal basic notification instead of removing it.
+Android requires a notification object while the monitoring Foreground Service runs. When dynamic speed is disabled, `NotificationHelper` provides a minimal basic notification instead of removing it. This requirement does not mean the user must grant `POST_NOTIFICATIONS`: on Android 13+, an authorized Overlay can run with notification permission denied, with the service notification hidden from the notification drawer and the system Active apps / Task Manager indication retained. Notification speed and Live Update cannot be displayed while notification permission is denied.
 
 The notification channel uses a stable `CHANNEL_ID`; its name and description come from localized resources. Channel availability, sound, and importance remain controlled by system settings.
 
