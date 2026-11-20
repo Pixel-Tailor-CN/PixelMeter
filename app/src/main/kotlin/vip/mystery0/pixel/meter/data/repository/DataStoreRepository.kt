@@ -63,6 +63,8 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         val KEY_SPEED_UNIT = intPreferencesKey("key_speed_unit")
         val KEY_MIN_SPEED_UNIT = intPreferencesKey("key_min_speed_unit")
         val KEY_SPEED_RATE_UNIT = intPreferencesKey("key_speed_rate_unit")
+        val KEY_HIDE_OVERLAY_AND_ICON_SPEED_SUFFIX = booleanPreferencesKey("key_hide_overlay_and_icon_speed_suffix")
+        val KEY_HIDE_LIVE_UPDATE_SPEED_SUFFIX = booleanPreferencesKey("key_hide_live_update_speed_suffix")
         val KEY_APP_THEME_MODE = intPreferencesKey("key_app_theme_mode")
         val KEY_APP_THEME_COLOR = intPreferencesKey("key_app_theme_color")
         val KEY_APP_THEME_USE_AMOLED_BLACK =
@@ -556,6 +558,20 @@ class DataStoreRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { preferences ->
             preferences[KEY_SPEED_RATE_UNIT] = normalizeSpeedRateUnit(rateUnit)
         }
+    }
+
+    val hideOverlayAndIconSpeedSuffix: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[KEY_HIDE_OVERLAY_AND_ICON_SPEED_SUFFIX] ?: false }
+
+    suspend fun setHideOverlayAndIconSpeedSuffix(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[KEY_HIDE_OVERLAY_AND_ICON_SPEED_SUFFIX] = enabled }
+    }
+
+    val hideLiveUpdateSpeedSuffix: Flow<Boolean> = dataStore.data
+        .map { preferences -> preferences[KEY_HIDE_LIVE_UPDATE_SPEED_SUFFIX] ?: false }
+
+    suspend fun setHideLiveUpdateSpeedSuffix(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[KEY_HIDE_LIVE_UPDATE_SPEED_SUFFIX] = enabled }
     }
 
     val minSpeedUnit: Flow<Int> = dataStore.data

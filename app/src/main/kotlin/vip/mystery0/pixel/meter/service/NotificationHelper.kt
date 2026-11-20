@@ -125,6 +125,8 @@ class NotificationHelper(private val context: Context) {
         speedUnit: Int = 0,
         minSpeedUnit: Int = 0,
         rateUnit: Int = 0,
+        hideOverlayAndIconSpeedSuffix: Boolean = false,
+        hideLiveUpdateSpeedSuffix: Boolean = false,
         postedAtMillis: Long
     ): NotificationBuildResult {
         val renderState = createRenderState(
@@ -142,7 +144,9 @@ class NotificationHelper(private val context: Context) {
             color = color,
             speedUnit = speedUnit,
             minSpeedUnit = minSpeedUnit,
-            rateUnit = rateUnit
+            rateUnit = rateUnit,
+            hideOverlayAndIconSpeedSuffix = hideOverlayAndIconSpeedSuffix,
+            hideLiveUpdateSpeedSuffix = hideLiveUpdateSpeedSuffix
         )
         return NotificationBuildResult(
             notification = buildNotificationFromState(
@@ -170,7 +174,9 @@ class NotificationHelper(private val context: Context) {
         color: Int,
         speedUnit: Int,
         minSpeedUnit: Int,
-        rateUnit: Int
+        rateUnit: Int,
+        hideOverlayAndIconSpeedSuffix: Boolean,
+        hideLiveUpdateSpeedSuffix: Boolean
     ): NotificationRenderState {
         var shouldLiveUpdate = isLiveUpdate
         val normalizedIconMode = if (iconMode in 0..2) iconMode else 0
@@ -233,7 +239,8 @@ class NotificationHelper(private val context: Context) {
                 contentText = contentText,
                 statusText = SpeedFormatter.formatSpeedTextForLiveUpdate(
                     iconSpeed,
-                    rateUnit
+                    rateUnit,
+                    hidePerSecondSuffix = hideLiveUpdateSpeedSuffix
                 ),
                 rateUnit = rateUnit,
                 iconMode = normalizedIconMode,
@@ -244,7 +251,8 @@ class NotificationHelper(private val context: Context) {
 
         val (valueStr, unitStr) = SpeedFormatter.formatSpeedText(
             iconSpeed,
-            rateUnit = rateUnit
+            rateUnit = rateUnit,
+            hidePerSecondSuffix = hideOverlayAndIconSpeedSuffix
         )
         return NotificationRenderState(
             mode = "bitmap",

@@ -28,6 +28,8 @@
     <string name="settings_speed_unit_title">Unidade de Velocidade</string>
     <string name="settings_speed_rate_unit_title">Unidade de taxa</string>
     <string name="settings_speed_rate_unit_desc">As unidades em bytes mantêm a escala 1024 existente. As unidades em bits usam o SI decimal (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_title">Ocultar o sufixo /s</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_desc">Omitir /s nas velocidades da janela flutuante e do ícone de notificação padrão.</string>
     <string name="settings_speed_rate_unit_bytes">Bytes (B/s)</string>
     <string name="settings_speed_rate_unit_bits">Bits (b/s)</string>
     <string name="settings_overlay_display_mode">Conteúdo da sobreposição</string>
@@ -97,6 +99,8 @@
     <string name="settings_category_notification">Configurações de Notificação</string>
     <string name="config_enable_live_update">Ativar Atualização em Tempo Real</string>
     <string name="config_enable_live_update_desc">Usar chip na barra de status (Requer Android 16+)</string>
+    <string name="settings_hide_live_update_speed_suffix_title">Ocultar /s na atualização em tempo real</string>
+    <string name="settings_hide_live_update_speed_suffix_desc">Omitir /s no indicador da atualização em tempo real na barra de estado.</string>
     <string name="settings_notification_display_mode">Exibir Conteúdo</string>
     <string name="settings_display_mode_total">Velocidade Total</string>
     <string name="settings_display_mode_upload">Somente Upload</string>

@@ -15,6 +15,8 @@ Standard notification mode uses `IconCompat.createWithBitmap()`:
 3. Canvas draws the selected value and unit with two Paint objects.
 4. Users can adjust value and unit text-size ratios.
 
+The **Hide /s suffix** setting under General affects the bitmap icon and the Overlay. It also applies to the bitmap icon used in Dynamic low-traffic mode.
+
 Notification drawer content is configured independently: Upload and download, Upload only, or Download only. Drawer text keeps custom prefixes and order.
 
 ## 3. Low-Traffic Mode
@@ -34,6 +36,8 @@ Android 16+ can enable Live Update:
 - Show compact automatically scaled Total, Upload, or Download text through `setShortCriticalText()`.
 - Request Promoted Ongoing presentation with `setRequestPromotedOngoing(true)`.
 - Require ordinary notification permission and system support; the manifest declares `POST_PROMOTED_NOTIFICATIONS`.
+
+The separate **Hide /s in Live Update** switch appears when Live Update is enabled on Android 16 or later. It affects only the compact status text and is off by default, independently of the General switch. Neither switch affects the notification drawer, the main screen, or threshold text.
 
 Android decides whether the notification is ultimately promoted.
 

@@ -70,6 +70,8 @@ class SettingsViewModel(
     val samplingInterval = repository.samplingInterval
     val speedUnit = repository.speedUnit
     val speedRateUnit = repository.speedRateUnit
+    val hideOverlayAndIconSpeedSuffix = repository.hideOverlayAndIconSpeedSuffix
+    val hideLiveUpdateSpeedSuffix = repository.hideLiveUpdateSpeedSuffix
     val minSpeedUnit = repository.minSpeedUnit
     val appThemeMode = repository.appThemeMode
     val appThemeColor = repository.appThemeColor
@@ -165,6 +167,10 @@ class SettingsViewModel(
 
     fun setSpeedUnit(unit: Int) = repository.setSpeedUnit(unit)
     fun setSpeedRateUnit(rateUnit: Int) = repository.setSpeedRateUnit(rateUnit)
+
+    fun setHideOverlayAndIconSpeedSuffix(enabled: Boolean) = repository.setHideOverlayAndIconSpeedSuffix(enabled)
+
+    fun setHideLiveUpdateSpeedSuffix(enabled: Boolean) = repository.setHideLiveUpdateSpeedSuffix(enabled)
     fun setMinSpeedUnit(unit: Int) = repository.setMinSpeedUnit(unit)
     fun setAppThemeMode(mode: Int) = repository.setAppThemeMode(mode)
     fun setAppThemeColor(color: Int) = repository.setAppThemeColor(color)

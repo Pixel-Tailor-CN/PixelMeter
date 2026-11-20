@@ -166,6 +166,12 @@ class NetworkRepository(
     private val _speedRateUnit = MutableStateFlow(0)
     val speedRateUnit: StateFlow<Int> = _speedRateUnit.asStateFlow()
 
+    private val _hideOverlayAndIconSpeedSuffix = MutableStateFlow(false)
+    val hideOverlayAndIconSpeedSuffix: StateFlow<Boolean> = _hideOverlayAndIconSpeedSuffix.asStateFlow()
+
+    private val _hideLiveUpdateSpeedSuffix = MutableStateFlow(false)
+    val hideLiveUpdateSpeedSuffix: StateFlow<Boolean> = _hideLiveUpdateSpeedSuffix.asStateFlow()
+
     private val _minSpeedUnit = MutableStateFlow(0)
     val minSpeedUnit: StateFlow<Int> = _minSpeedUnit.asStateFlow()
 
@@ -265,6 +271,10 @@ class NetworkRepository(
                 _speedRateUnit.value = DataStoreRepository.normalizeSpeedRateUnit(
                     prefs[DataStoreRepository.KEY_SPEED_RATE_UNIT] ?: 0
                 )
+                _hideOverlayAndIconSpeedSuffix.value =
+                    prefs[DataStoreRepository.KEY_HIDE_OVERLAY_AND_ICON_SPEED_SUFFIX] ?: false
+                _hideLiveUpdateSpeedSuffix.value =
+                    prefs[DataStoreRepository.KEY_HIDE_LIVE_UPDATE_SPEED_SUFFIX] ?: false
                 _minSpeedUnit.value = prefs[DataStoreRepository.KEY_MIN_SPEED_UNIT] ?: 0
                 _appThemeMode.value =
                     prefs[DataStoreRepository.KEY_APP_THEME_MODE] ?: AppThemeMode.Dynamic.value
@@ -433,6 +443,12 @@ class NetworkRepository(
             dataStoreRepository.speedRateUnit.collect {
                 _speedRateUnit.value = it
             }
+        }
+        scope.launch {
+            dataStoreRepository.hideOverlayAndIconSpeedSuffix.collect { _hideOverlayAndIconSpeedSuffix.value = it }
+        }
+        scope.launch {
+            dataStoreRepository.hideLiveUpdateSpeedSuffix.collect { _hideLiveUpdateSpeedSuffix.value = it }
         }
         scope.launch {
             dataStoreRepository.minSpeedUnit.collect {
@@ -629,6 +645,14 @@ class NetworkRepository(
 
     fun setSpeedRateUnit(rateUnit: Int) {
         scope.launch { dataStoreRepository.setSpeedRateUnit(rateUnit) }
+    }
+
+    fun setHideOverlayAndIconSpeedSuffix(enabled: Boolean) {
+        scope.launch { dataStoreRepository.setHideOverlayAndIconSpeedSuffix(enabled) }
+    }
+
+    fun setHideLiveUpdateSpeedSuffix(enabled: Boolean) {
+        scope.launch { dataStoreRepository.setHideLiveUpdateSpeedSuffix(enabled) }
     }
 
     fun setMinSpeedUnit(unit: Int) {

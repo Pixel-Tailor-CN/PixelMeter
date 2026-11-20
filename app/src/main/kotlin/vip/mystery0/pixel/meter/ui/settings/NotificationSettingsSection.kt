@@ -1,5 +1,6 @@
 package vip.mystery0.pixel.meter.ui.settings
 
+import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
     val displayMode by viewModel.notificationDisplayMode.collectAsState(initial = 0)
     val iconMode by viewModel.notificationIconMode.collectAsState(initial = 0)
     val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
+    val hideLiveUpdateSpeedSuffix by viewModel.hideLiveUpdateSpeedSuffix.collectAsState()
     val textSize by viewModel.notificationTextSize.collectAsState(initial = 0.65f)
     val unitSize by viewModel.notificationUnitSize.collectAsState(initial = 0.35f)
 
@@ -49,6 +51,14 @@ fun NotificationSettingsSection(viewModel: SettingsViewModel) {
             title = { Text(stringResource(R.string.config_enable_live_update)) },
             summary = { Text(stringResource(R.string.config_enable_live_update_desc)) }
         )
+        if (isLiveUpdateEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            SwitchPreference(
+                value = hideLiveUpdateSpeedSuffix,
+                onValueChange = { viewModel.setHideLiveUpdateSpeedSuffix(it) },
+                title = { Text(stringResource(R.string.settings_hide_live_update_speed_suffix_title)) },
+                summary = { Text(stringResource(R.string.settings_hide_live_update_speed_suffix_desc)) }
+            )
+        }
         TextFieldPreference(
             value = textUp,
             onValueChange = { viewModel.setNotificationTextUp(it) },

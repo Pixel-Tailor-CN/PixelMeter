@@ -60,7 +60,13 @@ object SpeedFormatter {
         else -> 1
     }
 
-    fun formatSpeedTextForLiveUpdate(bytes: Long, rateUnit: Int = 0): String {
+    fun formatSpeedTextForLiveUpdate(
+        bytes: Long,
+        rateUnit: Int = 0,
+        hidePerSecondSuffix: Boolean = false
+    ): String = compactSpeedText(bytes, rateUnit).withOptionalPerSecondSuffix(hidePerSecondSuffix)
+
+    private fun compactSpeedText(bytes: Long, rateUnit: Int): String {
         val value = rateValue(bytes, rateUnit)
         val base = base(rateUnit)
         if (value < base) return "${value.toLong()}${compactUnit(1, rateUnit)}"
@@ -78,7 +84,18 @@ object SpeedFormatter {
         bytes: Long,
         speedUnit: Int = 0,
         minSpeedUnit: Int = 0,
-        rateUnit: Int = 0
+        rateUnit: Int = 0,
+        hidePerSecondSuffix: Boolean = false
+    ): Pair<String, String> {
+        val (value, unit) = fullSpeedText(bytes, speedUnit, minSpeedUnit, rateUnit)
+        return value to unit.withOptionalPerSecondSuffix(hidePerSecondSuffix)
+    }
+
+    private fun fullSpeedText(
+        bytes: Long,
+        speedUnit: Int,
+        minSpeedUnit: Int,
+        rateUnit: Int
     ): Pair<String, String> {
         val value = rateValue(bytes, rateUnit)
         if (minSpeedUnit > 0 && speedUnit == 0) {
@@ -100,8 +117,17 @@ object SpeedFormatter {
         return "%.1f".format(Locale.ROOT, mega / base) to fullUnit(4, rateUnit)
     }
 
-    fun formatSpeedLine(bytes: Long, speedUnit: Int = 0, minSpeedUnit: Int = 0, rateUnit: Int = 0): String {
-        val (value, unit) = formatSpeedText(bytes, speedUnit, minSpeedUnit, rateUnit)
+    private fun String.withOptionalPerSecondSuffix(hidePerSecondSuffix: Boolean): String =
+        if (hidePerSecondSuffix) removeSuffix("/s") else this
+
+    fun formatSpeedLine(
+        bytes: Long,
+        speedUnit: Int = 0,
+        minSpeedUnit: Int = 0,
+        rateUnit: Int = 0,
+        hidePerSecondSuffix: Boolean = false
+    ): String {
+        val (value, unit) = formatSpeedText(bytes, speedUnit, minSpeedUnit, rateUnit, hidePerSecondSuffix)
         return "$value$unit"
     }
 
