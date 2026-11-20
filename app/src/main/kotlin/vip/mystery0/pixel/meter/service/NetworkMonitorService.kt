@@ -79,6 +79,8 @@ class NetworkMonitorService : Service() {
             speedUnit = repository.speedUnit.value,
             minSpeedUnit = repository.minSpeedUnit.value,
             rateUnit = repository.speedRateUnit.value,
+            hideOverlayAndIconSpeedSuffix = repository.hideOverlayAndIconSpeedSuffix.value,
+            hideLiveUpdateSpeedSuffix = repository.hideLiveUpdateSpeedSuffix.value,
             postedAtMillis = notificationPostedAtMillis
         )
         lastNotificationFingerprint = initialNotif.fingerprint
@@ -188,6 +190,8 @@ class NetworkMonitorService : Service() {
                         speedUnit = speedUnit,
                         minSpeedUnit = minSpeedUnit,
                         rateUnit = rateUnit,
+                        hideOverlayAndIconSpeedSuffix = repository.hideOverlayAndIconSpeedSuffix.value,
+                        hideLiveUpdateSpeedSuffix = repository.hideLiveUpdateSpeedSuffix.value,
                         postedAtMillis = notificationPostedAtMillis
                     )
                 }

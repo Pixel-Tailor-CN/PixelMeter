@@ -28,6 +28,8 @@
     <string name="settings_speed_unit_title">网速单位</string>
     <string name="settings_speed_rate_unit_title">速率单位</string>
     <string name="settings_speed_rate_unit_desc">字节单位沿用现有的 1024 进制。比特单位使用十进制 SI（1 Mb/s = 1,000,000 bits/s）。</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_title">隐藏 /s 后缀</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_desc">隐藏悬浮窗和普通通知小图标中网速的 /s 后缀。</string>
     <string name="settings_speed_rate_unit_bytes">字节 (B/s)</string>
     <string name="settings_speed_rate_unit_bits">比特 (b/s)</string>
     <string name="settings_overlay_display_mode">悬浮窗显示内容</string>
@@ -97,6 +99,8 @@
     <string name="settings_category_notification">通知设置</string>
     <string name="config_enable_live_update">启用实时更新</string>
     <string name="config_enable_live_update_desc">使用实时网速更新通知栏 (需要 Android 16+ 版本)</string>
+    <string name="settings_hide_live_update_speed_suffix_title">实时活动隐藏 /s</string>
+    <string name="settings_hide_live_update_speed_suffix_desc">隐藏实时活动状态栏胶囊中网速的 /s 后缀。</string>
     <string name="settings_notification_display_mode">显示内容</string>
     <string name="settings_display_mode_total">显示总网速</string>
     <string name="settings_display_mode_upload">仅显示上行网速</string>

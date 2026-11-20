@@ -159,6 +159,7 @@ class OverlayWindow(
                     val speedUnit by repository.speedUnit.collectAsState()
                     val minSpeedUnit by repository.minSpeedUnit.collectAsState()
                     val speedRateUnit by repository.speedRateUnit.collectAsState()
+                    val hideOverlayAndIconSpeedSuffix by repository.hideOverlayAndIconSpeedSuffix.collectAsState()
                     val context = LocalContext.current
                     val initialConfig = LocalConfiguration.current
                     var orientation by remember { mutableIntStateOf(initialConfig.orientation) }
@@ -326,6 +327,7 @@ class OverlayWindow(
                         speedUnit = speedUnit,
                         minSpeedUnit = minSpeedUnit,
                         speedRateUnit = speedRateUnit,
+                        hidePerSecondSuffix = hideOverlayAndIconSpeedSuffix,
                         onDrag = { x, y ->
                             if (!isLocked) {
                                 params?.let { p ->
@@ -391,6 +393,7 @@ fun OverlayContent(
     speedUnit: Int = 0,
     minSpeedUnit: Int = 0,
     speedRateUnit: Int = 0,
+    hidePerSecondSuffix: Boolean = false,
     onDrag: (Float, Float) -> Unit,
     onDragEnd: () -> Unit
 ) {
@@ -414,16 +417,16 @@ fun OverlayContent(
         }
     ) {
         val upSpeed = SpeedFormatter.formatSpeedLine(
-            speed.uploadSpeed, speedUnit, minSpeedUnit, speedRateUnit
+            speed.uploadSpeed, speedUnit, minSpeedUnit, speedRateUnit, hidePerSecondSuffix
         )
         val downSpeed = SpeedFormatter.formatSpeedLine(
-            speed.downloadSpeed, speedUnit, minSpeedUnit, speedRateUnit
+            speed.downloadSpeed, speedUnit, minSpeedUnit, speedRateUnit, hidePerSecondSuffix
         )
         val singleText = when (displayMode) {
             1 -> "$textUp$upSpeed"
             2 -> "$textDown$downSpeed"
             3 -> SpeedFormatter.formatSpeedLine(
-                speed.totalSpeed, speedUnit, minSpeedUnit, speedRateUnit
+                speed.totalSpeed, speedUnit, minSpeedUnit, speedRateUnit, hidePerSecondSuffix
             )
             else -> null
         }

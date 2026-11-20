@@ -16,7 +16,7 @@ Showing initializes lifecycle and saved state. Hiding removes the View, dispatch
 
 The Overlay formats speed through `SpeedFormatter` and supports four content modes: Upload and download, Upload only, Download only, and Total. Single-direction modes retain their matching configured prefix; Total has no direction prefix. Two-meter order, direction, spacing, and alignment controls remain visible but are disabled when the selected content mode does not use them.
 
-The global Rate unit selects Bytes (existing binary scale) or Bits (decimal SI scale).
+The global Rate unit selects Bytes (existing binary scale) or Bits (decimal SI scale). The **Hide /s suffix** switch next to Rate unit affects the Overlay and the standard notification icon. It is off by default and does not change the unit type, scaling, or prefixes.
 
 ## 4. Dragging and Position
 

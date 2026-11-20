@@ -26,6 +26,7 @@ fun GeneralSettingsSection(viewModel: SettingsViewModel) {
     val interval by viewModel.samplingInterval.collectAsState(initial = 1500L)
     val speedUnit by viewModel.speedUnit.collectAsState(initial = 0)
     val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
+    val hideOverlayAndIconSpeedSuffix by viewModel.hideOverlayAndIconSpeedSuffix.collectAsState()
     val minSpeedUnit by viewModel.minSpeedUnit.collectAsState(initial = 0)
     val appThemeMode by viewModel.appThemeMode.collectAsState(
         initial = AppThemeMode.Dynamic.value
@@ -62,6 +63,13 @@ fun GeneralSettingsSection(viewModel: SettingsViewModel) {
         title = { Text(stringResource(R.string.settings_speed_rate_unit_title)) },
         values = listOf(rateBytes, rateBits),
         summary = { Text(stringResource(R.string.settings_speed_rate_unit_desc)) }
+    )
+
+    SwitchPreference(
+        value = hideOverlayAndIconSpeedSuffix,
+        onValueChange = { viewModel.setHideOverlayAndIconSpeedSuffix(it) },
+        title = { Text(stringResource(R.string.settings_hide_overlay_and_icon_speed_suffix_title)) },
+        summary = { Text(stringResource(R.string.settings_hide_overlay_and_icon_speed_suffix_desc)) }
     )
 
     val labelAuto = stringResource(R.string.settings_speed_unit_auto)

@@ -31,6 +31,8 @@
     <string name="settings_speed_unit_title">Speed Unit</string>
     <string name="settings_speed_rate_unit_title">Rate unit</string>
     <string name="settings_speed_rate_unit_desc">Byte units keep the existing 1024 scale. Bit units use decimal SI (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_title">Hide /s suffix</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_desc">Omit /s from speeds in the overlay and the standard notification icon.</string>
     <string name="settings_speed_rate_unit_bytes">Bytes (B/s)</string>
     <string name="settings_speed_rate_unit_bits">Bits (b/s)</string>
     <string name="settings_overlay_display_mode">Overlay display content</string>
@@ -100,6 +102,8 @@
     <string name="settings_category_notification">Notification Settings</string>
     <string name="config_enable_live_update">Enable Live Update</string>
     <string name="config_enable_live_update_desc">Use status bar chip (Requires Android 16+)</string>
+    <string name="settings_hide_live_update_speed_suffix_title">Hide /s in Live Update</string>
+    <string name="settings_hide_live_update_speed_suffix_desc">Omit /s from the Live Update status bar chip.</string>
     <string name="settings_notification_display_mode">Display Content</string>
     <string name="settings_display_mode_total">Total Speed</string>
     <string name="settings_display_mode_upload">Upload Only</string>

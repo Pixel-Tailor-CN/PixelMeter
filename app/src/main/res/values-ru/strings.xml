@@ -28,6 +28,8 @@
     <string name="settings_speed_unit_title">Единица скорости</string>
     <string name="settings_speed_rate_unit_title">Единица скорости</string>
     <string name="settings_speed_rate_unit_desc">Для байтов сохраняется существующая шкала 1024. Для битов используется десятичная SI (1 Mb/s = 1,000,000 bits/s).</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_title">Скрыть суффикс /s</string>
+    <string name="settings_hide_overlay_and_icon_speed_suffix_desc">Убрать /s из показаний скорости в плавающем окне и на обычном значке уведомления.</string>
     <string name="settings_speed_rate_unit_bytes">Байты (B/s)</string>
     <string name="settings_speed_rate_unit_bits">Биты (b/s)</string>
     <string name="settings_overlay_display_mode">Содержимое оверлея</string>
@@ -97,6 +99,8 @@
     <string name="settings_category_notification">Настройки уведомлений</string>
     <string name="config_enable_live_update">Включить обновление в реальном времени</string>
     <string name="config_enable_live_update_desc">Использовать индикатор в строке состояния (требуется Android 16+)</string>
+    <string name="settings_hide_live_update_speed_suffix_title">Скрыть /s в обновлении в реальном времени</string>
+    <string name="settings_hide_live_update_speed_suffix_desc">Убрать /s из индикатора обновления в реальном времени в строке состояния.</string>
     <string name="settings_notification_display_mode">Отображаемые данные</string>
     <string name="settings_display_mode_total">Общая скорость</string>
     <string name="settings_display_mode_upload">Только отдача</string>
