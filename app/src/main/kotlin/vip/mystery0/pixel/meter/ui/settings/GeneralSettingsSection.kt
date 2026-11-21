@@ -9,6 +9,7 @@ import androidx.compose.material.icons.rounded.AutoFixHigh
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.FilterAlt
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
@@ -22,20 +23,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import vip.mystery0.pixel.meter.MainActivity
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.data.model.AppThemeMode
+import vip.mystery0.pixel.meter.util.AppLanguage
+import vip.mystery0.pixel.meter.util.AppLocaleManager
 import kotlin.math.roundToLong
 
 @Composable
 fun GeneralSettingsSection(viewModel: SettingsViewModel) {
     val context = LocalContext.current
+    val resources = LocalResources.current
+    val currentLanguage = remember(context, resources.configuration) {
+        AppLocaleManager.currentLanguage(context)
+    }
     val interval by viewModel.samplingInterval.collectAsState(initial = 1500L)
     val speedUnit by viewModel.speedUnit.collectAsState(initial = 0)
     val speedRateUnit by viewModel.speedRateUnit.collectAsState(initial = 0)
@@ -169,6 +178,20 @@ fun GeneralSettingsSection(viewModel: SettingsViewModel) {
 
     SettingsSection(title = stringResource(R.string.settings_section_appearance)) {
         val appearanceRows = buildList {
+            add(
+                SettingsRowItem("app-language") { modifier ->
+                    SettingsChoiceRow(
+                        modifier = modifier,
+                        value = currentLanguage,
+                        options = AppLanguage.entries,
+                        onValueChange = { AppLocaleManager.setLanguage(context, it) },
+                        title = stringResource(R.string.settings_app_language_title),
+                        summary = currentLanguage.title(),
+                        icon = Icons.Rounded.Language,
+                        optionLabel = { it.title() },
+                    )
+                },
+            )
             add(
                 SettingsRowItem("theme-mode") { modifier ->
                     SettingsChoiceRow(
@@ -327,3 +350,15 @@ private fun ChoiceValueAndDescription(
         )
     }
 }
+
+@Composable
+private fun AppLanguage.title(): String = stringResource(
+    when (this) {
+        AppLanguage.SYSTEM -> R.string.settings_app_language_system
+        AppLanguage.ENGLISH -> R.string.settings_app_language_english
+        AppLanguage.SIMPLIFIED_CHINESE -> R.string.settings_app_language_chinese
+        AppLanguage.PORTUGUESE -> R.string.settings_app_language_portuguese
+        AppLanguage.PORTUGUESE_BRAZIL -> R.string.settings_app_language_portuguese_brazil
+        AppLanguage.RUSSIAN -> R.string.settings_app_language_russian
+    },
+)

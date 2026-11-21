@@ -112,6 +112,12 @@ android {
         generateLocaleConfig = true
         localeFilters.addAll(discoverLocaleFilters(layout.projectDirectory.dir("src/main/res").asFile))
     }
+    bundle {
+        language {
+            // Keep all language resources in Play App Bundles for in-app language switching.
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {

@@ -1,5 +1,6 @@
 package vip.mystery0.pixel.meter.ui.settings
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,12 +51,17 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.ui.theme.PixelPulseTheme
+import vip.mystery0.pixel.meter.util.AppLocaleManager
 
 private val SettingsTwoPaneMinWidth = 840.dp
 private val SettingsSidebarWidth = 320.dp
 
 class SettingsActivity : ComponentActivity() {
     private val viewModel by viewModels<SettingsViewModel>()
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocaleManager.wrapBaseContext(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

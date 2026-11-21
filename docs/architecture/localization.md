@@ -36,6 +36,14 @@ Therefore, `values/strings.xml` must contain the complete English fallback resou
 
 Adding a language does not require a manually maintained Locale Config, but the directory name must use a valid Android qualifier.
 
+## 3.1 In-App Language Switching
+
+`AppLocaleManager` exposes an in-app language picker under General Settings → Appearance supporting `Follow system` plus every currently supported locale (`en`, `zh-CN`, `pt`, `pt-BR`, `ru`):
+
+- On Android 13+ (API 33+), it reads and updates system Per-App Language via `LocaleManager.applicationLocales`, staying in sync with Android's system App Languages settings.
+- On Android 12/12L (API 31–32), it stores the selected language tag in `app_locale_prefs`, wraps Activity/Application/Service contexts via `attachBaseContext`, refreshes the notification channel, and recreates active Activities.
+- `app/build.gradle.kts` disables App Bundle language splitting (`bundle.language.enableSplit = false`) so Play-distributed builds retain all supported locales for runtime switching.
+
 ## 4. Weblate
 
 Application strings are managed through Weblate. Translation changes may arrive from a Weblate branch or pull request.

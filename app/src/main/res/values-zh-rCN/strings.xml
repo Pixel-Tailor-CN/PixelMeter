@@ -200,4 +200,6 @@
     <string name="settings_section_auto_hide">自动隐藏</string>
     <string name="settings_section_content_and_layout">内容与布局</string>
     <string name="settings_section_background_execution">后台运行</string>
+    <string name="settings_app_language_title">应用语言</string>
+    <string name="settings_app_language_system">跟随系统</string>
 </resources>

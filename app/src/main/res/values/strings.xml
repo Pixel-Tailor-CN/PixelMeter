@@ -209,4 +209,11 @@
     <string name="settings_section_auto_hide">Auto-hide</string>
     <string name="settings_section_content_and_layout">Content &amp; Layout</string>
     <string name="settings_section_background_execution">Background Execution</string>
+    <string name="settings_app_language_title">App language</string>
+    <string name="settings_app_language_system">Follow system</string>
+    <string name="settings_app_language_english" translatable="false">English</string>
+    <string name="settings_app_language_chinese" translatable="false">简体中文</string>
+    <string name="settings_app_language_portuguese" translatable="false">Português</string>
+    <string name="settings_app_language_portuguese_brazil" translatable="false">Português (Brasil)</string>
+    <string name="settings_app_language_russian" translatable="false">Русский</string>
 </resources>

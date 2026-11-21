@@ -63,6 +63,7 @@ import vip.mystery0.pixel.meter.ui.MainViewModel
 import vip.mystery0.pixel.meter.ui.onboarding.OnboardingScreen
 import vip.mystery0.pixel.meter.ui.settings.SettingsActivity
 import vip.mystery0.pixel.meter.ui.theme.PixelPulseTheme
+import vip.mystery0.pixel.meter.util.AppLocaleManager
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -71,6 +72,10 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
     private var manualOnboardingRequested by mutableStateOf(false)
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocaleManager.wrapBaseContext(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

@@ -200,4 +200,6 @@
     <string name="settings_section_auto_hide">Ocultação Automática</string>
     <string name="settings_section_content_and_layout">Conteúdo e Layout</string>
     <string name="settings_section_background_execution">Execução em Segundo Plano</string>
+    <string name="settings_app_language_title">Idioma do aplicativo</string>
+    <string name="settings_app_language_system">Seguir o sistema</string>
 </resources>

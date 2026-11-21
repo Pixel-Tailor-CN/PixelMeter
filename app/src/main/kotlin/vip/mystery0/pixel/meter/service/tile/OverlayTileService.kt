@@ -1,5 +1,6 @@
 package vip.mystery0.pixel.meter.service.tile
 
+import android.content.Context
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import kotlinx.coroutines.CoroutineScope
@@ -9,11 +10,16 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.data.repository.NetworkRepository
+import vip.mystery0.pixel.meter.util.AppLocaleManager
 
 class OverlayTileService : TileService() {
     private val networkRepository: NetworkRepository by inject()
     private val scope = CoroutineScope(Dispatchers.Main)
     private var job: Job? = null
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocaleManager.wrapBaseContext(newBase))
+    }
 
     override fun onStartListening() {
         super.onStartListening()

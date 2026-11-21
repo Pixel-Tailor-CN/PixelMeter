@@ -18,6 +18,7 @@ import vip.mystery0.pixel.meter.MainActivity
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.data.source.NetSpeedData
 import vip.mystery0.pixel.meter.format.SpeedFormatter
+import vip.mystery0.pixel.meter.util.AppLocaleManager
 import kotlin.math.roundToInt
 
 class NotificationHelper(private val context: Context) {
@@ -187,9 +188,10 @@ class NotificationHelper(private val context: Context) {
         }
 
         if (!isNotificationEnabled) {
+            val localizedContext = AppLocaleManager.localizedContext(context)
             return NotificationRenderState(
                 mode = "disabled-static",
-                contentText = context.getString(R.string.notification_content_text),
+                contentText = localizedContext.getString(R.string.notification_content_text),
                 rateUnit = rateUnit,
                 iconMode = normalizedIconMode,
                 useCustomColor = useCustomColor,
@@ -199,9 +201,10 @@ class NotificationHelper(private val context: Context) {
 
         if (iconSpeed < threshold) {
             if (lowTrafficMode == 0) {
+                val localizedContext = AppLocaleManager.localizedContext(context)
                 return NotificationRenderState(
                     mode = "threshold-static",
-                    contentText = context.getString(R.string.notification_content_text_monitoring),
+                    contentText = localizedContext.getString(R.string.notification_content_text_monitoring),
                     rateUnit = rateUnit,
                     iconMode = normalizedIconMode,
                     useCustomColor = useCustomColor,
@@ -283,6 +286,7 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val localizedContext = AppLocaleManager.localizedContext(context)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -291,7 +295,7 @@ class NotificationHelper(private val context: Context) {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setWhen(postedAtMillis)
             .setShowWhen(false)
-            .setContentTitle(context.getString(R.string.notification_content_title))
+            .setContentTitle(localizedContext.getString(R.string.notification_content_title))
             .setContentText(renderState.contentText)
 
         if (renderState.useCustomColor) {

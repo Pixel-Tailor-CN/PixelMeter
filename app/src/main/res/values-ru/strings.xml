@@ -200,4 +200,6 @@
     <string name="settings_section_auto_hide">Автоскрытие</string>
     <string name="settings_section_content_and_layout">Содержимое и расположение</string>
     <string name="settings_section_background_execution">Фоновая работа</string>
+    <string name="settings_app_language_title">Язык приложения</string>
+    <string name="settings_app_language_system">Как в системе</string>
 </resources>
