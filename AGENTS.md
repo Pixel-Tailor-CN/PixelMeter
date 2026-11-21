@@ -21,7 +21,7 @@ Pixel Meter is a real-time network speed monitor for Google Pixel and stock or n
 ## 3. Toolchain
 
 - Module: `app/`
-- Min SDK: 31; Compile SDK / Target SDK: 37; JVM Target: 21
+- Min SDK: 31; Compile SDK: 37.2; Target SDK: 37; JVM Target: 21
 - `gradle/libs.versions.toml` is the source of truth for Kotlin, AGP, Compose BOM, dependencies, and `app-version`.
 - Current major versions: Kotlin 2.4.10, AGP 9.3.2, Compose BOM 2026.08.00
 - Global opt-in: `ExperimentalMaterial3Api`
