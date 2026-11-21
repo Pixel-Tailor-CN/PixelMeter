@@ -1,6 +1,7 @@
 package vip.mystery0.pixel.meter.ui.settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -57,6 +58,18 @@ private val SettingsTwoPaneMinWidth = 840.dp
 private val SettingsSidebarWidth = 320.dp
 
 class SettingsActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_INITIAL_PAGE = "extra_initial_page"
+
+        fun createIntent(context: Context, initialPage: SettingsPage? = null): Intent {
+            return Intent(context, SettingsActivity::class.java).apply {
+                if (initialPage != null) {
+                    putExtra(EXTRA_INITIAL_PAGE, initialPage.name)
+                }
+            }
+        }
+    }
+
     private val viewModel by viewModels<SettingsViewModel>()
 
     override fun attachBaseContext(newBase: Context) {
@@ -66,6 +79,9 @@ class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val initialPage = intent.getStringExtra(EXTRA_INITIAL_PAGE)?.let { name ->
+            SettingsPage.entries.firstOrNull { it.name == name }
+        }
         setContent {
             val appThemeMode by viewModel.appThemeMode.collectAsState()
             val appThemeColor by viewModel.appThemeColor.collectAsState()
@@ -79,13 +95,13 @@ class SettingsActivity : ComponentActivity() {
                 SideEffect {
                     window.setBackgroundDrawable(windowBackground.toArgb().toDrawable())
                 }
-                SettingsScreen()
+                SettingsScreen(initialPage = initialPage)
             }
         }
     }
 
     @Composable
-    fun SettingsScreen() {
+    fun SettingsScreen(initialPage: SettingsPage? = null) {
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         DisposableEffect(lifecycle) {
             val observer = LifecycleEventObserver { _, event ->
@@ -99,7 +115,8 @@ class SettingsActivity : ComponentActivity() {
             }
         }
 
-        var selectedPageName by rememberSaveable { mutableStateOf<String?>(null) }
+        val isDirectSubpageEntry = initialPage != null
+        var selectedPageName by rememberSaveable { mutableStateOf(initialPage?.name) }
         val selectedPage = selectedPageName?.let { name ->
             SettingsPage.entries.firstOrNull { it.name == name }
         }
@@ -168,12 +185,13 @@ class SettingsActivity : ComponentActivity() {
                     }
                 }
             } else {
+                val canReturnToDirectory = !isDirectSubpageEntry && selectedPage != null
                 SettingsNavigationContent(
                     targetState = selectedPage,
                     depth = { page -> if (page == null) 0 else 1 },
-                    canPreviewBack = selectedPage != null,
+                    canPreviewBack = canReturnToDirectory,
                     backTarget = null,
-                    onBack = if (selectedPage != null) ({ selectedPageName = null }) else null,
+                    onBack = if (canReturnToDirectory) ({ selectedPageName = null }) else null,
                 ) { displayedPage ->
                     val isActive = LocalNavigationActive.current
                     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
@@ -196,7 +214,7 @@ class SettingsActivity : ComponentActivity() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = {
-                                            if (displayedPage != null) {
+                                            if (!isDirectSubpageEntry && displayedPage != null) {
                                                 selectedPageName = null
                                             } else {
                                                 finish()

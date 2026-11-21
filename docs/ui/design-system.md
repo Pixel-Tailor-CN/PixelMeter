@@ -26,7 +26,7 @@ AMOLED Black applies only when fixed-color mode is active, the system is in dark
 
 ## 3. Main Screen
 
-The main screen shows total, upload, and download speeds; monitoring state and start/stop controls; notification and Overlay shortcuts; a Cloudflare speed-test entry; and cards for permission or service-start errors.
+The main screen shows total, upload, and download speeds; monitoring state and start/stop controls; two-target segmented Feature Configuration cards (`SettingsTwoTargetSwitchRow`) for toggling or jumping directly into Overlay and Notification settings; a Cloudflare speed-test entry; and cards for permission or service-start errors.
 
 The Activity owns system Intents and permission launchers. `MainViewModel` owns state and application actions.
 

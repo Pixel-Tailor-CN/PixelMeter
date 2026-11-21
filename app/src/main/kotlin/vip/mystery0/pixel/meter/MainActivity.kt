@@ -13,20 +13,26 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.PictureInPictureAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,7 +41,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -62,6 +67,10 @@ import vip.mystery0.pixel.meter.format.SpeedFormatter
 import vip.mystery0.pixel.meter.ui.MainViewModel
 import vip.mystery0.pixel.meter.ui.onboarding.OnboardingScreen
 import vip.mystery0.pixel.meter.ui.settings.SettingsActivity
+import vip.mystery0.pixel.meter.ui.settings.SettingsGroup
+import vip.mystery0.pixel.meter.ui.settings.SettingsPage
+import vip.mystery0.pixel.meter.ui.settings.SettingsRowItem
+import vip.mystery0.pixel.meter.ui.settings.SettingsTwoTargetSwitchRow
 import vip.mystery0.pixel.meter.ui.theme.PixelPulseTheme
 import vip.mystery0.pixel.meter.util.AppLocaleManager
 
@@ -385,26 +394,85 @@ class MainActivity : ComponentActivity() {
                 }
 
                 item {
-                    ConfigRow(
-                        title = stringResource(R.string.config_enable_overlay),
-                        subtitle = stringResource(R.string.config_enable_overlay_desc),
-                        checked = isOverlayEnabled,
-                        onCheckedChange = { viewModel.setOverlayEnabled(it) }
-                    )
-                }
-
-                item {
-                    ConfigRow(
-                        title = stringResource(R.string.config_enable_notification),
-                        subtitle = stringResource(
-                            if (isNotificationEnabled && !notificationPermissionGranted) {
-                                R.string.notification_permission_overlay_note
-                            } else {
-                                R.string.config_enable_notification_desc
-                            }
+                    SettingsGroup(
+                        rows = listOf(
+                            SettingsRowItem("feature-overlay") { modifier ->
+                                SettingsTwoTargetSwitchRow(
+                                    modifier = modifier,
+                                    title = stringResource(R.string.config_enable_overlay),
+                                    summary = stringResource(R.string.config_enable_overlay_desc),
+                                    checked = isOverlayEnabled,
+                                    onCheckedChange = { viewModel.setOverlayEnabled(it) },
+                                    onClick = {
+                                        context.startActivity(
+                                            SettingsActivity.createIntent(
+                                                context = context,
+                                                initialPage = SettingsPage.Overlay,
+                                            ),
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .background(
+                                                    MaterialTheme.colorScheme.primaryContainer,
+                                                    CircleShape,
+                                                ),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.PictureInPictureAlt,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            )
+                                        }
+                                    },
+                                )
+                            },
+                            SettingsRowItem("feature-notification") { modifier ->
+                                SettingsTwoTargetSwitchRow(
+                                    modifier = modifier,
+                                    title = stringResource(R.string.config_enable_notification),
+                                    summary = stringResource(
+                                        if (isNotificationEnabled && !notificationPermissionGranted) {
+                                            R.string.notification_permission_overlay_note
+                                        } else {
+                                            R.string.config_enable_notification_desc
+                                        },
+                                    ),
+                                    checked = isNotificationEnabled,
+                                    onCheckedChange = { viewModel.setNotificationEnabled(it) },
+                                    onClick = {
+                                        context.startActivity(
+                                            SettingsActivity.createIntent(
+                                                context = context,
+                                                initialPage = SettingsPage.Notification,
+                                            ),
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .background(
+                                                    MaterialTheme.colorScheme.primaryContainer,
+                                                    CircleShape,
+                                                ),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Notifications,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp),
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            )
+                                        }
+                                    },
+                                )
+                            },
                         ),
-                        checked = isNotificationEnabled,
-                        onCheckedChange = { viewModel.setNotificationEnabled(it) }
                     )
                 }
 
@@ -517,36 +585,5 @@ fun SpeedDashboardCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun ConfigRow(
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(
-                subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            enabled = enabled
-        )
     }
 }

@@ -5,11 +5,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -45,6 +49,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
@@ -240,6 +245,7 @@ fun SettingsSwitchRow(
     summary: String? = null,
     checked: Boolean,
     icon: ImageVector? = null,
+    leadingContent: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
 ) {
@@ -258,8 +264,12 @@ fun SettingsSwitchRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (icon != null) {
-            SettingsLeadingIcon(icon = icon, enabled = enabled)
+        if (icon != null || leadingContent != null) {
+            SettingsLeadingIcon(
+                icon = icon,
+                enabled = enabled,
+                leadingContent = leadingContent,
+            )
         }
         Column(
             modifier = Modifier
@@ -286,6 +296,100 @@ fun SettingsSwitchRow(
             enabled = enabled,
             modifier = Modifier.clearAndSetSemantics {},
         )
+    }
+}
+
+/**
+ * Android System Settings-style two-target row: tapping the left body navigates to detail settings,
+ * while a vertical divider separates an independent toggleable Switch target on the right.
+ */
+@Composable
+fun SettingsTwoTargetSwitchRow(
+    modifier: Modifier = Modifier,
+    title: String,
+    summary: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
+    icon: ImageVector? = null,
+    leadingContent: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
+    switchEnabled: Boolean = enabled,
+) {
+    val textOpacity = if (enabled) 1f else 0.6f
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .defaultMinSize(minHeight = if (summary.isNullOrEmpty()) 56.dp else 72.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clickable(
+                    enabled = enabled,
+                    role = Role.Button,
+                    onClick = onClick,
+                )
+                .padding(start = 16.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            if (icon != null || leadingContent != null) {
+                SettingsLeadingIcon(
+                    icon = icon,
+                    enabled = enabled,
+                    leadingContent = leadingContent,
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .alpha(textOpacity),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (!summary.isNullOrEmpty()) {
+                    Text(
+                        text = summary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(28.dp)
+                .background(MaterialTheme.colorScheme.outlineVariant),
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .semantics { contentDescription = title }
+                .toggleable(
+                    value = checked,
+                    enabled = switchEnabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Switch(
+                checked = checked,
+                onCheckedChange = null,
+                enabled = switchEnabled,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
     }
 }
 
