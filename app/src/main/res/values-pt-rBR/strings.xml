@@ -183,4 +183,21 @@
     <string name="settings_overlay_hide_background_desc">Torne o plano de fundo da janela flutuante totalmente transparente</string>
     <string name="settings_overlay_padding">Preenchimento do Fundo</string>
     <string name="notification_permission_overlay_note">As notificações não são permitidas. A janela flutuante ainda pode funcionar com permissão para aparecer sobre outros apps.</string>
+    <string name="settings_open_external_cd">Abrir link externo</string>
+    <string name="settings_state_enabled">Ativado</string>
+    <string name="settings_state_disabled">Desativado</string>
+    <string name="settings_summary_general">%1$dms · %2$s</string>
+    <string name="settings_summary_notification_live_update">Ativado · Atualização em Tempo Real</string>
+    <string name="settings_summary_overlay_locked">Ativado · Bloqueada</string>
+    <string name="settings_section_speed_and_units">Velocidade e Unidades</string>
+    <string name="settings_section_appearance">Aparência</string>
+    <string name="settings_section_startup_and_permissions">Inicialização e Permissões</string>
+    <string name="settings_section_basic">Básico</string>
+    <string name="settings_section_content_and_order">Conteúdo e Ordem</string>
+    <string name="settings_section_status_bar_icon">Ícone da Barra de Status</string>
+    <string name="settings_section_low_traffic">Baixo Tráfego</string>
+    <string name="settings_section_behavior_and_position">Comportamento e Posição</string>
+    <string name="settings_section_auto_hide">Ocultação Automática</string>
+    <string name="settings_section_content_and_layout">Conteúdo e Layout</string>
+    <string name="settings_section_background_execution">Execução em Segundo Plano</string>
 </resources>

@@ -183,4 +183,21 @@
     <string name="tile_desc_active">已开启</string>
     <string name="tile_desc_inactive">已关闭</string>
     <string name="notification_permission_overlay_note">未授予通知权限。授予“显示在其他应用上层”权限后，悬浮窗仍可运行。</string>
+    <string name="settings_open_external_cd">打开外部链接</string>
+    <string name="settings_state_enabled">已开启</string>
+    <string name="settings_state_disabled">已关闭</string>
+    <string name="settings_summary_general">%1$dms · %2$s</string>
+    <string name="settings_summary_notification_live_update">已开启 · 实时更新</string>
+    <string name="settings_summary_overlay_locked">已开启 · 已锁定</string>
+    <string name="settings_section_speed_and_units">网速与单位</string>
+    <string name="settings_section_appearance">外观</string>
+    <string name="settings_section_startup_and_permissions">启动与权限</string>
+    <string name="settings_section_basic">基础</string>
+    <string name="settings_section_content_and_order">内容与顺序</string>
+    <string name="settings_section_status_bar_icon">状态栏图标</string>
+    <string name="settings_section_low_traffic">低流量模式</string>
+    <string name="settings_section_behavior_and_position">行为与位置</string>
+    <string name="settings_section_auto_hide">自动隐藏</string>
+    <string name="settings_section_content_and_layout">内容与布局</string>
+    <string name="settings_section_background_execution">后台运行</string>
 </resources>

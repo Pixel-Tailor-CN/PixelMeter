@@ -16,7 +16,6 @@ koin = "4.2.2"
 palette = "1.0.0"
 browser = "1.10.0"
 datastore = "1.2.1"
-preference = "2.2.0"
 colorpicker = "1.2.0"
 junit = "4.13.2"
 
@@ -35,7 +34,6 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-zhanghai-preference = { group = "me.zhanghai.compose.preference", name = "preference", version.ref = "preference" }
 skydoves-colorpicker = { group = "com.github.skydoves", name = "colorpicker-compose", version.ref = "colorpicker" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 

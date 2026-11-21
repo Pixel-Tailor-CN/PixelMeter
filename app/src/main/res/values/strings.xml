@@ -192,4 +192,21 @@
     <string name="tile_desc_active">Active</string>
     <string name="tile_desc_inactive">Inactive</string>
     <string name="notification_permission_overlay_note">Notifications are not permitted. The floating window can still run with permission to display over other apps.</string>
+    <string name="settings_open_external_cd">Open external link</string>
+    <string name="settings_state_enabled">Enabled</string>
+    <string name="settings_state_disabled">Disabled</string>
+    <string name="settings_summary_general">%1$dms · %2$s</string>
+    <string name="settings_summary_notification_live_update">Enabled · Live Update</string>
+    <string name="settings_summary_overlay_locked">Enabled · Locked</string>
+    <string name="settings_section_speed_and_units">Speed &amp; Units</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_startup_and_permissions">Startup &amp; Permissions</string>
+    <string name="settings_section_basic">Basic</string>
+    <string name="settings_section_content_and_order">Content &amp; Order</string>
+    <string name="settings_section_status_bar_icon">Status Bar Icon</string>
+    <string name="settings_section_low_traffic">Low Traffic</string>
+    <string name="settings_section_behavior_and_position">Behavior &amp; Position</string>
+    <string name="settings_section_auto_hide">Auto-hide</string>
+    <string name="settings_section_content_and_layout">Content &amp; Layout</string>
+    <string name="settings_section_background_execution">Background Execution</string>
 </resources>

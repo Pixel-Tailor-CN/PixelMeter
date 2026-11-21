@@ -2,66 +2,57 @@ package vip.mystery0.pixel.meter.ui.settings
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import me.zhanghai.compose.preference.ProvidePreferenceLocals
 import vip.mystery0.pixel.meter.R
 import vip.mystery0.pixel.meter.ui.theme.PixelPulseTheme
 
-private const val SETTINGS_TWO_PANE_MIN_WIDTH_DP = 840
-private const val SETTINGS_PAGE_TRANSITION_DURATION_MS = 250
-private const val SETTINGS_PAGE_FADE_DURATION_MS = 50
-private const val SETTINGS_PAGE_OPEN_FADE_DELAY_MS = 28
-private const val SETTINGS_PAGE_CLOSE_FADE_DELAY_MS = 20
-private const val SETTINGS_PAGE_TRANSITION_DISTANCE_DP = 96
-private val SettingsSidebarWidth = 280.dp
+private val SettingsTwoPaneMinWidth = 840.dp
+private val SettingsSidebarWidth = 320.dp
 
 class SettingsActivity : ComponentActivity() {
     private val viewModel by viewModels<SettingsViewModel>()
@@ -76,8 +67,12 @@ class SettingsActivity : ComponentActivity() {
             PixelPulseTheme(
                 themeMode = appThemeMode,
                 themeColor = appThemeColor,
-                useAmoledBlack = useAmoledBlack
+                useAmoledBlack = useAmoledBlack,
             ) {
+                val windowBackground = MaterialTheme.colorScheme.background
+                SideEffect {
+                    window.setBackgroundDrawable(windowBackground.toArgb().toDrawable())
+                }
                 SettingsScreen()
             }
         }
@@ -98,69 +93,150 @@ class SettingsActivity : ComponentActivity() {
             }
         }
 
-        val twoPaneMinWidthPx = with(LocalDensity.current) {
-            SETTINGS_TWO_PANE_MIN_WIDTH_DP.dp.roundToPx()
-        }
-        val isTwoPane = LocalWindowInfo.current.containerSize.width >= twoPaneMinWidthPx
         var selectedPageName by rememberSaveable { mutableStateOf<String?>(null) }
         val selectedPage = selectedPageName?.let { name ->
             SettingsPage.entries.firstOrNull { it.name == name }
         }
-        val effectivePage = if (isTwoPane) {
-            selectedPage ?: SettingsPage.General
-        } else {
-            selectedPage
-        }
-        val appBarTitleRes = if (!isTwoPane && selectedPage != null) {
-            selectedPage.titleRes
-        } else {
-            R.string.title_settings
-        }
+        val pageStateHolder = rememberSaveableStateHolder()
 
-        BackHandler(enabled = !isTwoPane && selectedPage != null) {
-            selectedPageName = null
-        }
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+        ) {
+            val isTwoPane = maxWidth >= SettingsTwoPaneMinWidth
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(appBarTitleRes)) },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                if (!isTwoPane && selectedPage != null) {
-                                    selectedPageName = null
-                                } else {
-                                    finish()
+            if (isTwoPane) {
+                val effectivePage = selectedPage ?: SettingsPage.General
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.background,
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(stringResource(R.string.title_settings)) },
+                            navigationIcon = {
+                                IconButton(onClick = { finish() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                        contentDescription = stringResource(R.string.content_description_back),
+                                    )
                                 }
-                            }
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.content_description_back))
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.background,
+                                scrolledContainerColor = MaterialTheme.colorScheme.background,
+                            ),
+                        )
+                    },
+                ) { innerPadding ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .consumeWindowInsets(innerPadding),
+                    ) {
+                        pageStateHolder.SaveableStateProvider("settings-home") {
+                            MainSettingsPage(
+                                viewModel = viewModel,
+                                selectedPage = effectivePage,
+                                twoPane = true,
+                                onPageSelected = { selectedPageName = it.name },
+                                modifier = Modifier
+                                    .width(SettingsSidebarWidth)
+                                    .fillMaxHeight(),
+                            )
+                        }
+
+                        VerticalDivider()
+
+                        pageStateHolder.SaveableStateProvider(effectivePage.name) {
+                            SettingsDetailPane(
+                                page = effectivePage,
+                                viewModel = viewModel,
+                                showHeaderTitle = true,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                            )
                         }
                     }
-                )
-            },
-            contentWindowInsets = WindowInsets(0, 0, 0, 0)
-        ) { paddingValues ->
-            ProvidePreferenceLocals {
-                if (isTwoPane) {
-                    SettingsTwoPaneContent(
+                }
+            } else {
+                SettingsNavigationContent(
+                    targetState = selectedPage,
+                    depth = { page -> if (page == null) 0 else 1 },
+                    canPreviewBack = selectedPage != null,
+                    backTarget = null,
+                    onBack = if (selectedPage != null) ({ selectedPageName = null }) else null,
+                ) { displayedPage ->
+                    val isActive = LocalNavigationActive.current
+                    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(
+                        canScroll = { isActive },
+                    )
+                    Scaffold(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
-                        selectedPage = effectivePage ?: SettingsPage.General,
-                        onPageSelected = { selectedPageName = it.name },
-                        viewModel = viewModel
-                    )
-                } else {
-                    SettingsSinglePaneContent(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        selectedPage = selectedPage,
-                        onPageSelected = { selectedPageName = it.name },
-                        viewModel = viewModel
-                    )
+                            .nestedScroll(scrollBehavior.nestedScrollConnection),
+                        containerColor = MaterialTheme.colorScheme.background,
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        stringResource(
+                                            displayedPage?.titleRes ?: R.string.title_settings,
+                                        ),
+                                    )
+                                },
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            if (displayedPage != null) {
+                                                selectedPageName = null
+                                            } else {
+                                                finish()
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                                            contentDescription = stringResource(R.string.content_description_back),
+                                        )
+                                    }
+                                },
+                                scrollBehavior = scrollBehavior,
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.background,
+                                    scrolledContainerColor = MaterialTheme.colorScheme.background,
+                                ),
+                            )
+                        },
+                    ) { innerPadding ->
+                        pageStateHolder.SaveableStateProvider(displayedPage?.name ?: "settings-home") {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                                    .consumeWindowInsets(innerPadding),
+                            ) {
+                                if (displayedPage == null) {
+                                    MainSettingsPage(
+                                        viewModel = viewModel,
+                                        selectedPage = null,
+                                        twoPane = false,
+                                        onPageSelected = { selectedPageName = it.name },
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                } else {
+                                    SettingsDetailPane(
+                                        page = displayedPage,
+                                        viewModel = viewModel,
+                                        showHeaderTitle = false,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -168,138 +244,33 @@ class SettingsActivity : ComponentActivity() {
 }
 
 @Composable
-private fun SettingsSinglePaneContent(
-    selectedPage: SettingsPage?,
-    onPageSelected: (SettingsPage) -> Unit,
-    viewModel: SettingsViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val transitionDistancePx = with(LocalDensity.current) {
-        SETTINGS_PAGE_TRANSITION_DISTANCE_DP.dp.roundToPx()
-    }
-    AnimatedContent(
-        targetState = selectedPage,
-        modifier = modifier,
-        transitionSpec = {
-            val isForward = targetState != null && initialState == null
-            val enterOffset = if (isForward) transitionDistancePx else -transitionDistancePx
-            val exitOffset = if (isForward) -transitionDistancePx else transitionDistancePx
-            val enterFade = if (isForward) {
-                fadeIn(
-                    animationSpec = tween(
-                        durationMillis = SETTINGS_PAGE_FADE_DURATION_MS,
-                        delayMillis = SETTINGS_PAGE_OPEN_FADE_DELAY_MS,
-                        easing = LinearEasing
-                    )
-                )
-            } else {
-                EnterTransition.None
-            }
-            val exitFade = if (isForward) {
-                ExitTransition.None
-            } else {
-                fadeOut(
-                    animationSpec = tween(
-                        durationMillis = SETTINGS_PAGE_FADE_DURATION_MS,
-                        delayMillis = SETTINGS_PAGE_CLOSE_FADE_DELAY_MS,
-                        easing = LinearEasing
-                    )
-                )
-            }
-            val enterTransition = slideInHorizontally(
-                animationSpec = tween(
-                    durationMillis = SETTINGS_PAGE_TRANSITION_DURATION_MS,
-                    easing = FastOutSlowInEasing
-                ),
-                initialOffsetX = { enterOffset }
-            ) + enterFade
-            val exitTransition = slideOutHorizontally(
-                animationSpec = tween(
-                    durationMillis = SETTINGS_PAGE_TRANSITION_DURATION_MS,
-                    easing = FastOutSlowInEasing
-                ),
-                targetOffsetX = { exitOffset }
-            ) + exitFade
-
-            enterTransition togetherWith exitTransition using SizeTransform(clip = false)
-        },
-        label = "SettingsPageTransition"
-    ) { page ->
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item {
-                if (page == null) {
-                    MainSettingsPage(
-                        selectedPage = null,
-                        onPageSelected = onPageSelected
-                    )
-                } else {
-                    SettingsPageContent(
-                        page = page,
-                        viewModel = viewModel
-                    )
-                }
-            }
-            item {
-                Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsTwoPaneContent(
-    selectedPage: SettingsPage,
-    onPageSelected: (SettingsPage) -> Unit,
-    viewModel: SettingsViewModel,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier
-                .width(SettingsSidebarWidth)
-                .fillMaxHeight()
-        ) {
-            item {
-                MainSettingsPage(
-                    selectedPage = selectedPage,
-                    onPageSelected = onPageSelected
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
-            }
-        }
-
-        VerticalDivider()
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-        ) {
-            item {
-                SettingsPageContent(
-                    page = selectedPage,
-                    viewModel = viewModel
-                )
-            }
-            item {
-                Spacer(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsPageContent(
+private fun SettingsDetailPane(
     page: SettingsPage,
     viewModel: SettingsViewModel,
+    showHeaderTitle: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    when (page) {
-        SettingsPage.General -> GeneralSettingsSection(viewModel)
-        SettingsPage.Notification -> NotificationSettingsSection(viewModel)
-        SettingsPage.Overlay -> OverlaySettingsSection(viewModel)
-        SettingsPage.Background -> BackgroundSettingsSection(viewModel)
-        SettingsPage.About -> AboutSettingsSection()
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 8.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        if (showHeaderTitle) {
+            Text(
+                text = stringResource(page.titleRes),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                    .semantics { heading() },
+            )
+        }
+        when (page) {
+            SettingsPage.General -> GeneralSettingsSection(viewModel)
+            SettingsPage.Notification -> NotificationSettingsSection(viewModel)
+            SettingsPage.Overlay -> OverlaySettingsSection(viewModel)
+            SettingsPage.Background -> BackgroundSettingsSection(viewModel)
+            SettingsPage.About -> AboutSettingsSection()
+        }
     }
 }

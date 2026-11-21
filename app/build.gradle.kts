@@ -131,7 +131,6 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.browser)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.zhanghai.preference)
     implementation(libs.skydoves.colorpicker)
     testImplementation(libs.junit)
 }

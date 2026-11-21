@@ -183,4 +183,21 @@
     <string name="tile_desc_active">Активно</string>
     <string name="tile_desc_inactive">Неактивно</string>
     <string name="notification_permission_overlay_note">Уведомления запрещены. Плавающее окно может работать при наличии разрешения на показ поверх других приложений.</string>
+    <string name="settings_open_external_cd">Открыть внешнюю ссылку</string>
+    <string name="settings_state_enabled">Включено</string>
+    <string name="settings_state_disabled">Отключено</string>
+    <string name="settings_summary_general">%1$d мс · %2$s</string>
+    <string name="settings_summary_notification_live_update">Включено · Live Update</string>
+    <string name="settings_summary_overlay_locked">Включено · Закреплено</string>
+    <string name="settings_section_speed_and_units">Скорость и единицы</string>
+    <string name="settings_section_appearance">Внешний вид</string>
+    <string name="settings_section_startup_and_permissions">Запуск и разрешения</string>
+    <string name="settings_section_basic">Основные</string>
+    <string name="settings_section_content_and_order">Содержимое и порядок</string>
+    <string name="settings_section_status_bar_icon">Значок в строке состояния</string>
+    <string name="settings_section_low_traffic">Низкий трафик</string>
+    <string name="settings_section_behavior_and_position">Поведение и положение</string>
+    <string name="settings_section_auto_hide">Автоскрытие</string>
+    <string name="settings_section_content_and_layout">Содержимое и расположение</string>
+    <string name="settings_section_background_execution">Фоновая работа</string>
 </resources>

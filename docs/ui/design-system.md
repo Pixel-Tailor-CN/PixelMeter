@@ -32,15 +32,19 @@ The Activity owns system Intents and permission launchers. `MainViewModel` owns 
 
 ## 4. Settings
 
-Settings are divided into General, Notification, Overlay, Background, and About. Phones use a main directory with secondary pages. At widths of 840dp or more, settings use a two-pane layout. General settings include an entry for rerunning Onboarding.
+Settings are divided into General, Notification, Overlay, Background, and About. The directory groups categories into Material 3 segmented rounded cards (`surfaceContainerLow`, `24dp` outer / `4dp` inner corners, `2dp` item spacing) with circular tonal category icons and live status summaries. Subpages organize options into logical subsections with `primary` section headers.
+
+- Phones (`< 840dp`) transition whole pages (including the `TopAppBar`) between the directory and subpages using Activity-like horizontal slide, fade, and subtle scale transitions with RTL support and Android 14+ Predictive Back preview via `SeekableTransitionState` and `PredictiveBackHandler`.
+- Large screens (`>= 840dp`) switch to a two-pane layout with a `320dp` category sidebar (`secondaryContainer` selection highlight + check indicator) and a scrollable detail pane.
+- General settings include an entry for rerunning Onboarding.
 
 ## 5. Controls and Values
 
-- Boolean options use `SwitchPreference` or a Material 3 Switch.
-- Enumerations use `ListPreference`.
-- Continuous ranges use `SliderPreference`.
-- Exact values use `TextFieldPreference`.
-- Colors use `colorpicker-compose`.
+- Boolean options use `SettingsSwitchRow` with row-level toggle semantics.
+- Enumerations use `SettingsChoiceRow` backed by a Material 3 radio dialog.
+- Continuous ranges use `SettingsSliderRow` with an inline Material 3 `Slider` for live visual feedback.
+- Exact values use `SettingsTextFieldRow` backed by an `OutlinedTextField` dialog.
+- Colors use `ColorPreference` with a bordered circular swatch trailing preview and `colorpicker-compose`.
 - UI labels must state px, dp, sp, and speed units where relevant.
 
 ## 6. Responsive Design and Accessibility
