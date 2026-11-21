@@ -1,22 +1,22 @@
 [versions]
-agp = "9.3.2"
-kotlin = "2.4.10"
+agp = "9.5.2"
+kotlin = "2.4.21"
 
 app-version = "1.9.8"
 android-compileSdk = "37"
 android-minSdk = "31"
 android-targetSdk = "37"
 
-coreKtx = "1.19.0"
-lifecycleRuntimeKtx = "2.11.0"
+coreKtx = "1.19.1"
+lifecycleRuntimeKtx = "2.11.1"
 activityCompose = "1.13.0"
-composeBom = "2026.08.00"
+composeBom = "2026.11.01"
 material-icons = "1.7.8"
 koin = "4.2.2"
-palette = "1.0.0"
+palette = "1.1.0"
 browser = "1.10.0"
-datastore = "1.2.1"
-colorpicker = "1.2.0"
+datastore = "1.3.0"
+colorpicker = "1.3.0"
 junit = "4.13.2"
 
 [libraries]
