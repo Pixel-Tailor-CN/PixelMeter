@@ -7,6 +7,8 @@ on:
 
 jobs:
   build-and-release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
@@ -75,3 +77,53 @@ jobs:
       - name: Cleanup Keystore
         if: always()
         run: rm -f "$RUNNER_TEMP/release.jks"
+
+  submit-to-google-play:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Get the signed bundle and notes from the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --pattern "PixelMeter-${GITHUB_REF_NAME}.aab" --output app-release.aab
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --json body --jq '.body' > CHANGELOG.md
+
+      - name: Prepare localized Google Play release notes
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          changelog = Path("CHANGELOG.md").read_text(encoding="utf-8").strip()
+          english = re.search(r"(?m)^【(?:Added|Fixed|Improved)】$", changelog)
+          boundary = english.start() if english else len(changelog)
+          notes = {"zh-CN": changelog[:boundary].strip(), "en-US": changelog[boundary:].strip()}
+          if not any(notes.values()):
+              raise SystemExit("The GitHub Release has no release notes.")
+          if notes["zh-CN"] and not notes["zh-CN"].startswith(("【新增】", "【修复】", "【优化】")):
+              raise SystemExit("Expected a localized category heading at the start of CHANGELOG.md.")
+
+          directory = Path("whatsnew")
+          directory.mkdir()
+          for language, text in notes.items():
+              if text:
+                  if len(text) > 500:
+                      raise SystemExit(f"{language} release notes exceed Google Play's 500-character limit.")
+                  (directory / f"whatsnew-{language}").write_text(text, encoding="utf-8")
+
+      - name: Submit production release for Google Play review
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: vip.mystery0.pixel.meter
+          releaseFiles: app-release.aab
+          releaseName: ${{ github.ref_name }}
+          whatsNewDirectory: whatsnew
+          track: production
+          status: completed
+          changesNotSentForReview: 'false'
